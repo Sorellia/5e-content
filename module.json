@@ -1,28 +1,170 @@
 {
   "id": "5e-content",
   "title": "5e Content",
-  "version": "1.0.0",
+  "description": "A consolidation of various content for my 5e campaigns",
+  "library": false,
+  "socket": true,
+  "version": "0.8",
   "compatibility": {
     "minimum": "11",
     "verified": "11"
   },
-  "esmodules": [
-    "setup.js"
-  ],
-  "relationships": {
-    "systems": [
-      {
-        "id": "dnd5e",
-        "type": "system",
-        "compatibility": {}
-      }
-    ]
-  },
-  "description": "A consolidation of various content for my 5e campaigns",
   "authors": [
     {
-      "name": "Airwolf"
+      "name": "Airwolf",
+      "url": "https://github.com/Sorellia"
     }
+  ],
+  "relationships": {
+    "systems": [{
+        "id": "dnd5e",
+        "type": "system",
+        "compatibility": {
+          "minimum": "2.2.1",
+          "verified": "2.2.2"
+        }
+      }
+    ],
+    "requires": [{
+      "id": "midi-qol",
+      "type": "module",
+      "manifest": "https://gitlab.com/tposney/midi-qol/raw/v10/package/module.json",
+      "compatibility": {
+        "verified": "10.0.57",
+        "minimum": "10.0.46"
+      }
+    },
+    {
+      "id": "dfreds-convenient-effects",
+      "type": "module",
+      "manifest": "https://github.com/DFreds/dfreds-convenient-effects/releases/latest/download/module.json",
+      "compatibility": {
+        "verified": "4.2.1"
+      }
+    },
+    {
+      "id": "warpgate",
+      "type": "module",
+      "manifest": "https://github.com/trioderegion/warpgate/releases/latest/download/module.json",
+      "compatibility": {
+        "verified": "1.19.0"
+      }
+    },
+    {
+      "id": "effectmacro",
+      "type": "module",
+      "manifest": "https://github.com/krbz999/effectmacro/releases/latest/download/module.json",
+      "compatibility": {
+        "verified": "10.0.15"
+      }
+    },
+    {
+      "id": "templatemacro",
+      "type": "module",
+      "manifest": "https://github.com/krbz999/templatemacro/releases/latest/download/module.json",
+      "compatibility": {
+        "verified": "10.0.2"
+      }
+    },
+    {
+      "id": "sequencer",
+      "type": "module",
+      "manifest": "https://github.com/fantasycalendar/FoundryVTT-Sequencer/releases/latest/download/manifest.json",
+      "compatibility": {
+        "verified": "3.0.6"
+      }
+    },
+    {
+      "id": "token-attacher",
+      "type": "module",
+      "manifest": "https://raw.githubusercontent.com/KayelGee/token-attacher/master/module.json",
+      "compatibility": {
+        "verified": "4.5.12"
+      }
+    },
+    {
+      "id": "babonus",
+      "type": "module",
+      "manifest": "https://github.com/krbz999/babonus/releases/latest/download/module.json",
+      "compatibility": {
+        "verified": "10.5.4"
+      }
+    },
+    {
+      "id": "socketlib",
+      "type": "module",
+      "manifest": "https://raw.githubusercontent.com/manuelVo/foundryvtt-socketlib/master/module.json",
+      "compatibility": {
+        "verified": "3.0.6"
+      }
+    },
+    {
+      "id": "dae",
+      "type": "module",
+      "manifest": "https://gitlab.com/tposney/dae/raw/v10/package/module.json",
+      "compatibility": {
+        "verified": "10.0.23"
+      }
+    },
+    {
+      "id": "autoanimations",
+      "type": "module",
+      "manifest": "https://github.com/otigon/automated-jb2a-animations/releases/latest/download/module.json",
+      "compatibility": {
+        "verified": "4.2.51"
+      }
+    }],
+    "optional": [{
+      "id": "tidy5e-sheet",
+      "type": "module",
+      "manifest": "https://github.com/sdenec/tidy5e-sheet/releases/download/0.8.25/module.json",
+      "compatibility": {
+        "verified": "0.8.25"
+      }
+    },
+    {
+      "id": "custom-character-sheet-sections",
+      "type": "module",
+      "manifest": "https://github.com/jessev14/custom-character-sheet-sections/releases/latest/download/module.json",
+      "compatibility": {
+        "verified": "1.5.0"
+      }
+    },
+    {
+      "id": "tokenmagic",
+      "type": "module",
+      "manifest": "https://raw.githubusercontent.com/Feu-Secret/Tokenmagic/master/tokenmagic/module.json",
+      "compatibility": {
+        "verified": "0.6.1.2"
+      }
+    },
+    {
+      "id": "visual-active-effects",
+      "type": "module",
+      "manifest": "https://github.com/krbz999/visual-active-effects/releases/latest/download/module.json",
+      "compatibility": {
+        "verified": "10.0.14"
+      }
+    },
+    {
+      "id": "compendium-folders",
+      "type": "module",
+      "manifest": "https://raw.githubusercontent.com/earlSt1/vtt-compendium-folders/10x-update/module.json",
+      "compatibility": {
+        "verified": "2.5.7"
+      }
+    },
+    {
+      "id": "animated-spell-effects-cartoon",
+      "type": "module",
+      "manifest": "https://github.com/jackkerouac/animated-spell-effects-cartoon/releases/download/latest/module.json",
+      "compatibility": {
+        "verified": "0.4.5"
+      }
+    }]
+  },
+  "esmodules": [
+    "scripts/module.js"
   ],
   "packs": [
     {
@@ -113,5 +255,11 @@
         "ASSISTANT": "OWNER"
       }
     }
-  ]
+  ],
+  "changelog": "",
+  "url": "https://github.com/Sorellia/5e-content",
+  "manifest": "",
+  "download": "",
+  "license": "LICENSE",
+  "readme": "README.md"
 }
