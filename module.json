@@ -256,7 +256,7 @@
       }
     }
   ],
-  "changelog": "",
+  "changelog": "https://github.com/Sorellia/5e-content/blob/main/CHANGELOG.md",
   "url": "https://github.com/Sorellia/5e-content",
   "manifest": "#{MANIFEST}#",
   "download": "#{DOWNLOAD}#",
