@@ -4,7 +4,7 @@
   "description": "A consolidation of various content for my 5e campaigns",
   "library": false,
   "socket": true,
-  "version": "0.8",
+  "version": "#{VERSION}",
   "compatibility": {
     "minimum": "11",
     "verified": "11"
@@ -258,8 +258,8 @@
   ],
   "changelog": "",
   "url": "https://github.com/Sorellia/5e-content",
-  "manifest": "",
-  "download": "",
+  "manifest": "#{MANIFEST}#",
+  "download": "#{DOWNLOAD}#",
   "license": "LICENSE",
   "readme": "README.md"
 }
