@@ -1,7 +1,7 @@
-import {socket} from './module.js';
+import { socket } from './module.js';
 
 export let helpers = {
-    'dialog': async function _dialog(title, options, content, format = 'column') {
+    'dialog': async function _dialog(title, options, content, format = 'row') {
         if (content) content = '<center>' + content + '</center>';
         let buttons = options.map(([label, value]) => ({label, value}));
         let selected = await warpgate.buttonDialog(
@@ -62,6 +62,16 @@ export let helpers = {
             'name': item.name
         }
         await warpgate.mutate(token, updates, {}, options);
+    },
+    'getTargetFromSingleSet': async function _getTargetFromSingleSet(set) {
+        let target;
+        let iterator = set.entries();
+
+        for (const entry of iterator) {
+            target = entry;
+            target = target[0];
+        }
+        return target;
     },
     'findEffect': function _findEffect(actor, effectName) {
         return actor.effects.getName(effectName);
@@ -395,9 +405,9 @@ export let helpers = {
     'getCombatant': function _getCombatant(token) {
         return game.combat?.combatants?.find(i => i.tokenId === token.id);
     },
-    'remoteDialog': async function _remoteDialog(title, options, userId, content) {
-        if (userId === game.user.id) return await helpers.dialog(title, options, content);
-        return await socket.executeAsUser('remoteDialog', userId, titlle, options, content);
+    'remoteDialog': async function _remoteDialog(title, options, userId, content, format = 'row') {
+        if (userId === game.user.id) return await helpers.dialog(title, options, content, format);
+        return await socket.executeAsUser('remoteDialog', userId, title, options, content, format);
     },
     'firstOwner': function _firstOwner(document) {
         return warpgate.util.firstOwner(document);
@@ -688,7 +698,6 @@ export let helpers = {
         ditem.totalDamage = keptDamage;
     },
     'thirdPartyReactionMessage': async function _thirdPartyReactionMessage(user) {
-        console.log(user);
         let playerName = user.name;
         let lastMessage = game.messages.find(m => m.flags?.['chris-premades']?.thirdPartyReactionMessage);
         let message = '<hr>Waiting for a 3rd party reaction from:<br><b>' + playerName + '</b>';

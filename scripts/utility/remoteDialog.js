@@ -1,7 +1,7 @@
 import {helpers} from '../helpers.js';
 
-export async function remoteDialog(title, options, content) {
-    return await helpers.dialog(title, options, content);
+export async function remoteDialog(title, options, content, format = 'row') {
+    return await helpers.dialog(title, options, content, format);
 }
 
 export async function remoteDocumentDialog(title, uuids) {
