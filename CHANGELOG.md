@@ -4,14 +4,12 @@ The next phase of the blood hunter release is here! This version brings the rema
 ## New Content:
 * Further automation of blood rite runes.
 
-## Bug Fixes
+## Bug Fixes:
 * Streamlined several parts of the codebase in regards to blood rites to make them flow better and be less... hacky, in particular with vital sacrifices.
 
-## Update Notes
+## Update Notes:
 * Rite of Blindness, Exsanguination and Siphoning have all been fully automated.
 * All Rites have had their codebase improved and made more efficient, should iron out any final kinks in them programmatically.
-
-## Update Notes:
 
 # 0.5.02 Release:
 
