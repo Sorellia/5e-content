@@ -32,6 +32,9 @@ export let helpers = {
             config
         );
     },
+    'getRandomInt': function _getRandomInt(maxValue) {
+        return Math.floor(Math.random() * maxValue);
+    },
     'hasMutation': async function _hasMutation(token, mutationName, revertMutation = false, warn = false) {
         const mutStack = warpgate.mutationStack(token);
         if (revertMutation && !!mutStack.getName(mutationName)) {

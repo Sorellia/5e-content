@@ -36,7 +36,7 @@ export let bloodHunter = {
         }
     },
     // Function to perform the actual vital sacrifice
-    'performVitalSacrifice': async function _performVitalSacrifice(itemCardId, riteDie, token) {
+    'performVitalSacrifice': async function _performVitalSacrifice(itemCardId, riteDie, token, updateHP = true) {
         let actor = token.actor;
         // Query the above function to determine what the vital sacrifice roll will be, and then subtract the con mod for the purposes of the active effect
         let damageRoll = await bloodHunter.rollRiteDie(actor, riteDie, 'vital-control');
@@ -106,10 +106,20 @@ export let bloodHunter = {
             // Create the effect on the actor
             await helpers.createEffect(actor, effectData);
         }
-        // Roll the workflow damage via midi to 'present it', and update the actor to actually apply the damage automatically
-        await helpers.applyWorkflowDamage(token, damageRoll, "none", [], "Vital Sacrifice", itemCardId);
-        let hpUpdate = actor.system.attributes.hp.value - damageRoll.total;
-        await actor.update({'system.attributes.hp.value': hpUpdate});
+        if (updateHP) {
+            // Roll the workflow damage via midi to 'present it', and update the actor to actually apply the damage automatically
+            await helpers.applyWorkflowDamage(token, damageRoll, "none", [], "Vital Sacrifice", itemCardId);
+            let hpUpdate = actor.system.attributes.hp.value - damageRoll.total;
+            await actor.update({'system.attributes.hp.value': hpUpdate});
+        }
+    },
+    'selectRandomTrait': async function _selectRandomTrait(actor, traitType) {
+        let traitArray = actor.system.traits[traitType].value;
+        if (traitArray.size === 1) return await helpers.getTargetFromSingleSet(traitArray);
+        let randomTrait = helpers.getRandomInt(traitArray.size);
+        let selectedTrait = Array.from(traitArray);
+        selectedTrait = selectedTrait[randomTrait];
+        return selectedTrait;
     },
     // Supply the target token and whether or not the version is invoked, and the effect will be applied.
     'applyRiteEffects': async function _applyRiteEffects(workflow, targetToken, riteDie, invoked = false) {
@@ -131,7 +141,7 @@ export let bloodHunter = {
         let effectData = {
             'duration': {'seconds': 12},
             'icon': workflow.item.img,
-            'label': riteLabel,
+            'name': riteLabel,
             'origin': workflow.item.uuid,           
         };
 
@@ -255,6 +265,8 @@ export let bloodHunter = {
                 }
                 break;
             case 'Rite of Blindness':
+                actor.unsetFlag('5e-content', 'blindness.target');
+                actor.unsetFlag('5e-content', 'blindness');
                 effectData = false;
                 break;                
             case 'Rite of Confusion':
@@ -308,9 +320,117 @@ export let bloodHunter = {
                 }
                 break;
             case 'Rite of Decay':
-
+                if (!invoked) effectData = false;
+                if (invoked) {
+                    effectData.changes = [
+                        {
+                            'key': 'system.traits.dr.value',
+                            'mode': 0,
+                            'value': `-necrotic`,
+                            'priority': 0
+                        }
+                    ];
+                    effectData.duration = {};
+                    effectData.flags = {
+                        'dae': {
+                            'specialDuration': ['turnEndSource', 'isDamaged']
+                        }
+                    };
+                    if (helpers.checkTrait(target.actor, 'di', 'necrotic')) {
+                        effectData.changes = [
+                            {
+                                'key': 'system.traits.di.value',
+                                'mode': 0,
+                                'value': `-necrotic`,
+                                'priority': 0
+                            },
+                            {
+                                'key': 'system.traits.dr.value',
+                                'mode': 0,
+                                'value': `necrotic`,
+                                'priority': 0
+                            }
+                        ];
+                    }
+                }
+                break;
             case 'Rite of Exposure':
-
+                effectData.flags = {
+                    'dae': {
+                        'specialDuration': ['turnEndSource']
+                    }
+                };
+                effectData.changes = [];
+                let targetResistances = target.actor.system.traits.dr.value;
+                let targetImmunities =  target.actor.system.traits.di.value;
+                if (!invoked) {
+                    let invokedEffect = helpers.findEffect(target.actor, 'Rite of Exposure (Invoked)');
+                    if (invokedEffect) {
+                        effectData = false;
+                        break;
+                    }
+                    if (targetResistances.size != 0) {
+                        targetResistances.forEach(resistance => {
+                            effectData.changes.push(
+                                {
+                                    'key': 'system.traits.dr.value',
+                                    'mode': 0,
+                                    'value': `-${resistance}`,
+                                    'priority': 0
+                                }
+                            );
+                        });
+                    }
+                } else {
+                    if (targetImmunities.size != 0) {
+                        targetImmunities.forEach(immunity => {
+                            if (!helpers.checkTrait(target.actor, 'dr', immunity)) {
+                                effectData.changes.push(
+                                    {
+                                        'key': 'system.traits.di.value',
+                                        'mode': 0,
+                                        'value': `-${immunity}`,
+                                        'priority': 0
+                                    },
+                                    {
+                                        'key': 'system.traits.dr.value',
+                                        'mode': 0,
+                                        'value': `${immunity}`,
+                                        'priority': 0
+                                    }
+                                );
+                            } else {
+                                effectData.changes.push(
+                                    {
+                                        'key': 'system.traits.di.value',
+                                        'mode': 0,
+                                        'value': `-${immunity}`,
+                                        'priority': 0
+                                    }
+                                );
+                            }
+                        });
+                    }
+                    if (targetResistances.size != 0) {
+                        targetResistances.forEach(resistance => {
+                            if (!helpers.checkTrait(target.actor, 'di', resistance)) {
+                                effectData.changes = effectData.changes.concat([
+                                    {
+                                        'key': 'system.traits.dr.value',
+                                        'mode': 0,
+                                        'value': `-${resistance}`,
+                                        'priority': 0
+                                    }
+                                ]);
+                            }
+                        });
+                    }
+                }
+                if (!effectData.changes) {
+                    console.log("EffectData Changes is blank!");
+                    effectData = false;
+                }
+                break;
             case 'Rite of Exsanguination':
                 if (!invoked) effectData = false;
                 if (invoked) {
@@ -394,7 +514,136 @@ export let bloodHunter = {
                 }
                 break;
             case 'Rite of Revelation':
+                let dr = target.actor.system.traits.dr.value;
+                let di = target.actor.system.traits.di.value;
+                let dv = target.actor.system.traits.dv.value;
+                if (!dv && !dr && !di) {
+                    await helpers.dialog('Resistances, Immunities, and Vulnerabilities', [['Ok', true]], 'The selected target has no resistances, immunities or vulnerabilities. Please consult your DM for another ability to be revealed.');
+                    break;
+                }
+                let drivMessage = 'Your target has ';
+                let drMessage;
+                let diMessage;
+                let dvMessage;
+                let rollButtons = [];
+                if (dr.size != 0) {
+                    if (dr.size === 1) drMessage = `<b>1</b> resistance`;
+                    else drMessage = `<b>${dr.size}</b> resistances`;
+                    rollButtons.push(['Resistances', 'dr']);
+                }
+                if (di.size != 0) {
+                    if (di.size === 1) diMessage = `<b>1</b> immunity`;
+                    else diMessage = `<b>${di.size}</b> immunities`;
+                    rollButtons.push(['Immunities', 'di']);
+                }
+                if (dv.size != 0) {
+                    if (dv.size === 1) dvMessage = `<b>1</b> vulnerabilty`;
+                    else dvMessage = `<b>${dv.size}</b> vulnerabilties`;
+                    rollButtons.push(['Vulnerabilities', 'dv']);
+                }
 
+                if (drMessage && diMessage && !dvMessage) {
+                    drivMessage = drivMessage + drMessage + ' and ' + diMessage;
+                } else if (!drMessage && diMessage && dvMessage) {
+                    drivMessage = drivMessage + diMessage + ' and ' + dvMessage;
+                } else if (drMessage && !diMessage && dvMessage) {
+                    drivMessage = drivMessage + drMessage + ' and ' + dvMessage;
+                } else if (drMessage && !diMessage && !dvMessage) {
+                    drivMessage = drivMessage + drMessage;
+                } else if (!drMessage && diMessage && !dvMessage) {
+                    drivMessage = drivMessage + diMessage;
+                } else if (!drMessage && diMessage && dvMessage) {
+                    drivMessage = drivMessage + dvMessage;
+                } else if (drMessage && diMessage && dvMessage) {
+                    drivMessage = drivMessage + drMessage + ', ' + diMessage + ' and ' + dvMessage;
+                }
+
+                let choice;
+                if (rollButtons.length === 1) {
+                    drivMessage = drivMessage + ', would you like to learn one of these?'
+                    let decision = await helpers.dialog('Rite of Revelation', constants.yesNo, drivMessage);
+                    if (!decision) break;
+                    choice = rollButtons[0][1];
+                } else {
+                    drivMessage = drivMessage + ', which category would you like to choose to learn one from?'
+                    choice = await helpers.dialog('Rite of Revelation', rollButtons, drivMessage);
+                }
+
+                let traitChosen = await bloodHunter.selectRandomTrait(target.actor, choice);
+                let traitName = traitChosen[0].toUpperCase() + traitChosen.slice(1);
+                if (choice === 'dr') await helpers.dialog('Chosen Trait', [['Ok', true]], `You have discerned that the target has a resistance to <b>${traitName}</b> damage`);
+                if (choice === 'di') await helpers.dialog('Chosen Trait', [['Ok', true]], `You have discerned that the target has an immunity to <b>${traitName}</b> damage`);
+                if (choice === 'dv') await helpers.dialog('Chosen Trait', [['Ok', true]], `You have discerned that the target has a vulnerability to <b>${traitName}</b> damage`);
+                if (!invoked) effectData = false;
+                else {
+                    effectData.changes = [];
+                    let invokedRollButtons = [];
+                    let traitStrip;
+                    let invokedChoice;
+
+                    if (dr.size != 0) {
+                        invokedRollButtons.push(['Resistances', 'dr']);
+                    }
+                    if (di.size != 0) {
+                        invokedRollButtons.push(['Immunities', 'di']);
+                    }
+
+                    let invokedMessage = 'You may choose one of the following traits to randomly dispel using your rite; doing so will turn that trait into resistance if it is an immunity, or remove it entirely.';
+                    if (invokedRollButtons.length === 0) await helpers.dialog('No Trait', [['Ok', true]], 'The target has no traits of either type for you to dispel.');
+                    let drdi;
+                    if (choice === 'dr') drdi = 'damage resistance';
+                    else if (choice === 'di') drdi = 'damage immunity';
+                    if (choice === 'dr' || choice === 'di') invokedChoice = await helpers.dialog('Invoke this trait', constants.yesNo, `Would you like to invoke this rite against the <b>${traitName} ${drdi}</b>?`);
+                    if (invokedChoice) traitStrip = traitChosen;
+                    else {
+                        choice = await helpers.dialog('Invoked Rite of Revelation', invokedRollButtons, invokedMessage);
+                        traitStrip = await bloodHunter.selectRandomTrait(target.actor, choice);
+                    }
+                    let traitStripName = traitStrip[0].toUpperCase() + traitStrip.slice(1);
+                    
+                    effectData.duration.seconds = 60;
+                    if (choice === 'di') {
+                        effectData.name = riteLabel + ' (DI: ' + traitStripName + ')';
+                        if (!helpers.checkTrait(target.actor, 'dr', traitStrip)) {
+                            effectData.changes.push(
+                                {
+                                    'key': 'system.traits.di.value',
+                                    'mode': 0,
+                                    'value': `-${traitStrip}`,
+                                    'priority': 0
+                                },
+                                {
+                                    'key': 'system.traits.dr.value',
+                                    'mode': 0,
+                                    'value': `${traitStrip}`,
+                                    'priority': 0
+                                }
+                            );
+                        } else {
+                            effectData.changes.push(
+                                {
+                                    'key': 'system.traits.di.value',
+                                    'mode': 0,
+                                    'value': `-${traitStrip}`,
+                                    'priority': 0
+                                }
+                            );
+                        }
+                        if (!invokedChoice) await helpers.dialog('Chosen Trait', [['Ok', true]], `You have reduced the target's immunity to <b>${traitStripName}</b> damage down to just resistance`);
+                    } else {
+                        effectData.name = riteLabel + ' (DR: ' + traitStripName + ')';
+                        effectData.changes.push(
+                            {
+                                'key': 'system.traits.dr.value',
+                                'mode': 0,
+                                'value': `-${traitStrip}`,
+                                'priority': 0
+                            }
+                        );
+                        if (!invokedChoice) await helpers.dialog('Chosen Trait', [['Ok', true]], `You have dispelled the target's resistance to <b>${traitStripName}</b> damage`);
+                    }
+                }
+                break;
             case 'Rite of Siphoning':
                 effectData = false;
                 actor.setFlag("5e-content", `vitalSacrifice.siphon`, true);
@@ -493,7 +742,7 @@ export let bloodHunter = {
         return effectData; // Return the effect data; by now it's been modified with the final data of the rite in question.
     },
     // Prompt the actor for a vital sacrifice; takes on the actor to be inspected, its token, the item calling the prompt and if it must be accepted to use the item.
-    'vitalSacrificePrompt': async function _vitalSacrificePrompt(workflow, actor, token, item, neededForItemUse = false, sizeConstraint = false, updateUses = true) {
+    'vitalSacrificePrompt': async function _vitalSacrificePrompt(workflow, actor, token, item, neededForItemUse = false, sizeConstraint = false, updateUses = true, bloodLessCreature = false) {
         // If the actor's HP is too low for a vital sacrifice, tell them.
         let riteDice = actor.system.scale[`blood-hunter`][`blood-rite-die`];
         if (actor.system.attributes.hp.value <= riteDice.faces) {
@@ -507,8 +756,9 @@ export let bloodHunter = {
         }
         // Generate two different messages, depending on if this vital sacrifice is required or not.
         let vitalSacMessage = 'Would you like to make a Vital Sacrifice to improve this rite?';
-        if (neededForItemUse) vitalSacMessage = 'You cannot use this rite without a Vital Sacrifice, which can also bolster it. Make a Vital Sacrifice?'
-        if (neededForItemUse && sizeConstraint) vitalSacMessage = 'You cannot use this rite on that target without a Vital Sacrifice, as they are too big. Make a Vital Sacrifice?'
+        if (neededForItemUse) vitalSacMessage = 'You cannot use this rite without a Vital Sacrifice, which can also bolster it. Make a Vital Sacrifice?';
+        if (neededForItemUse && sizeConstraint) vitalSacMessage = 'You cannot use this rite on that target without a Vital Sacrifice, as they are too big. Make a Vital Sacrifice?';
+        if (neededForItemUse && bloodLessCreature) vitalSacMessage = 'Your target does not possess blood, and as such your rites cannot affect it unless you make a Vital Sacrifice. Make a Vital Sacrifice?';
         // Call the helper dialog function to ask the player to vital sacrifice
         let firstOwner = helpers.firstOwner(actor);
         const result = await helpers.remoteDialog('Vital Sacrifice', constants.yesNo, firstOwner.id,vitalSacMessage, 'row');
@@ -558,22 +808,33 @@ export let bloodHunter = {
         let itemUses = item.system.uses.value;
         let targetSize = helpers.getSize(target.actor);
         let conc = helpers.findEffect(target.actor, 'Concentrating');
+        let curseSpec = helpers.getFeature(actor, 'Curse Specialist');
+        let targetRace = helpers.raceOrType(target.actor)
         // Coverage for the specific interaction of several rites needing specific conditions to be met.
-        if (item.name === 'Rite of the Puppet' && target.actor.attributes.hp.value !== 0) {
-            ui.notifications.warn("Target has HP remaining and is not a valid target!");
-            return false;
-        } else if (item.name === 'Rite of Binding' && targetSize > 3) {
-            let vitalSacrifice = await bloodHunter.vitalSacrificePrompt(workflow, actor, token, item, true, true);
+        if (!curseSpec && (targetRace === 'undead' || targetRace === 'construct' || targetRace === 'ooze' || targetRace === 'elemental')) {
+            let vitalSacrifice;
+            if (itemUses === 0) { 
+                vitalSacrifice = await bloodHunter.vitalSacrificePrompt(workflow, actor, token, item, true, false, true, true);
+                if (!vitalSacrifice) return;
+            } else vitalSacrifice = await bloodHunter.vitalSacrificePrompt(workflow, actor, token, item, true, false, false, true);
             if (!vitalSacrifice) return false;
-        } else if (item.name === 'Rite of Confusion' && !conc) {
-            ui.notifications.warn("Target must be Concentrating to be a valid target!");
-            return false;
-        } else if (itemUses === 0) {
-// If the item has no uses and it isn't the rite of exsanguination (which cannot be invoked at 0 uses), tell the player that they MUST use a vital sacrifice to use the rite.
-            if (item.name === 'Rite of Exsanguination') return;
-            let vitalSacrifice = await bloodHunter.vitalSacrificePrompt(workflow, actor, token, item, true);
-            if (!vitalSacrifice) return;
-        } else await bloodHunter.vitalSacrificePrompt(workflow, actor, token, item);
+        } else {
+            if (item.name === 'Rite of the Puppet' && target.actor.attributes.hp.value !== 0) {
+                ui.notifications.warn("Target has HP remaining and is not a valid target!");
+                return false;
+            } else if (item.name === 'Rite of Binding' && targetSize > 3) {
+                let vitalSacrifice = await bloodHunter.vitalSacrificePrompt(workflow, actor, token, item, true, true);
+                if (!vitalSacrifice) return false;
+            } else if (item.name === 'Rite of Confusion' && !conc) {
+                ui.notifications.warn("Target must be Concentrating to be a valid target!");
+                return false;
+            } else if (itemUses === 0) {
+    // If the item has no uses and it isn't the rite of exsanguination (which cannot be invoked at 0 uses), tell the player that they MUST use a vital sacrifice to use the rite.
+                if (item.name === 'Rite of Exsanguination') return;
+                let vitalSacrifice = await bloodHunter.vitalSacrificePrompt(workflow, actor, token, item, true);
+                if (!vitalSacrifice) return;
+            } else await bloodHunter.vitalSacrificePrompt(workflow, actor, token, item);
+        }
     },
     // Should take place before active effects on all rites; parses whether or not a vital sacrifice is required, or if a vital control is available.
     'vitalSacrificeOrControl': async function _vitalSacrificeOrControl(args) {

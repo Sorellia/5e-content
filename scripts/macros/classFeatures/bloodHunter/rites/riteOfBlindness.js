@@ -94,6 +94,7 @@ async function debuffAttack(sourceActor, workflow) {
         };
     }
     
+    sourceActor.unsetFlag('5e-content', 'blindness.target');
     sourceActor.unsetFlag('5e-content', 'blindness');
 
     await helpers.createEffect(workflow.token.actor, effectData);

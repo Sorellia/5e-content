@@ -3,6 +3,10 @@ const yesNo = [
     ['No', false]
 ];
 const okCancel = [
+    ['Ok', true],
+    ['Cancel', false]
+];
+const okCancelButton = [
     {
         'label': 'Cancel',
         'value': false
@@ -25,6 +29,7 @@ const yesNoButton = [
 
 export let constants = {
     'yesNo': yesNo,
-    'okCanel': okCancel,
+    'okCancel': okCancel,
+    'okCancelButton': okCancelButton,
     'yesNoButton': yesNoButton
 }
