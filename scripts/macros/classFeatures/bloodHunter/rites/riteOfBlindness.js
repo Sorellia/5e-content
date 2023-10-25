@@ -23,6 +23,9 @@ async function reactionDefense(workflow) {
             return;
         }
         for (let token of tokens) {
+            let riteDice = token.actor.system.scale[`blood-hunter`][`blood-rite-die`];
+            let originItem = await helpers.getFeature(token.actor, 'Rite of Blindness');
+            if (token.actor.system.attributes.hp.value <= riteDice.faces) if (originItem.system.uses === 0) continue;
             let firstOwner = helpers.firstOwner(token);
             await helpers.thirdPartyReactionMessage(firstOwner);
             let message = 'Protect ' + targetToken.actor.name + ' by debiliating their attacker with your Rite of Blindness?'
@@ -30,7 +33,7 @@ async function reactionDefense(workflow) {
             let selection = await helpers.remoteDialog('Rite of Blindness', constants.yesNo, firstOwner.id, message, 'row');
             if (!selection) continue;
             await token.actor.setFlag('5e-content', 'blindness.target', workflow.tokenUuid);
-            let originItem = await helpers.getFeature(token.actor, 'Rite of Blindness');
+            await helpers.addCondition(targetToken.actor, 'Reaction', false);
             itemUse = await originItem.use();
             if (itemUse) {
                 sourceActor = token.actor;
@@ -38,13 +41,16 @@ async function reactionDefense(workflow) {
             }
         }
     } else if (rite) {
-        console.log("Target of the attack has rite of blindness!");
+        let riteDice = targetToken.actor.system.scale[`blood-hunter`][`blood-rite-die`];
+        if (targetToken.actor.system.attributes.hp.value <= riteDice.faces) if (rite.system.uses.value === 0) return;
+        if (helpers.findEffect(targetToken.actor, 'Reaction')) return;
         let firstOwner = helpers.firstOwner(targetToken);
         await helpers.thirdPartyReactionMessage(firstOwner);
         let message = 'You are being attacked! Protect yourself by debiliating your attacker with Rite of Blindness?'
         let selection = await helpers.remoteDialog('Rite of Blindness', constants.yesNo, firstOwner.id, message, 'row');
         if (selection) {
             await targetToken.actor.setFlag('5e-content', 'blindness.target', workflow.tokenUuid);
+            await helpers.addCondition(targetToken.actor, 'Reaction', false);
             itemUse = await rite.use();
         }
     }

@@ -1,5 +1,5 @@
-import { helpers } from "./helpers.js";
-import { constants } from "./constants.js";
+import { helpers } from "../../../helpers.js";
+import { constants } from "../../../constants.js";
 
 export let bloodHunter = {
     'rollRiteDie': async function _rollRiteDie(actor, riteDie, mode = 'vital-sacrifice') {
@@ -766,13 +766,13 @@ export let bloodHunter = {
         if (result && neededForItemUse) { // If the player chose YES and the item MUST have a vital sacrifice to operate.
             actor.setFlag('5e-content', 'vitalSacrifice.proceed', true);
             if (updateUses) await helpers.updateItemUses(token.document, item, 1);
-            await bloodHunter.performVitalSacrifice(workflow.itemCardId, riteDice.die, token);
+            await bloodHunter.performVitalSacrifice('', riteDice.die, token);
             return true;
             // Set the flag appropriate to vital sacrifice, so that the later workflow can detect that it must be used. Update the item's uses to allow it to be used, and then return true to allow the workflow to continue.
         } else if (result && !neededForItemUse) { // If the player chose YES but the item does NOT require a vital sacrifice to operate.
             actor.setFlag('5e-content', 'vitalSacrifice.proceed', true);
             let vitalC = await bloodHunter.vitalControlPrompt(actor, token);
-            if (!vitalC) await bloodHunter.performVitalSacrifice(workflow.itemCardId, riteDice.die, token);
+            if (!vitalC) await bloodHunter.performVitalSacrifice('', riteDice.die, token);
             return true;
             // Set the flag appropriate to vital sacrifice, and test for vital control before returning true, to allow the workflow to continue.
         } else if (!result && !neededForItemUse) { // If the player chose NO but the item does NOT require a vital sacrifice to operate.
@@ -809,9 +809,10 @@ export let bloodHunter = {
         let targetSize = helpers.getSize(target.actor);
         let conc = helpers.findEffect(target.actor, 'Concentrating');
         let curseSpec = helpers.getFeature(actor, 'Curse Specialist');
-        let targetRace = helpers.raceOrType(target.actor)
+        let targetRace = helpers.raceOrType(target.actor);
+        let invalidRaces = ['undead', 'construct', 'ooze', 'elemental'];
         // Coverage for the specific interaction of several rites needing specific conditions to be met.
-        if (!curseSpec && (targetRace === 'undead' || targetRace === 'construct' || targetRace === 'ooze' || targetRace === 'elemental')) {
+        if (!curseSpec && invalidRaces.includes(targetRace)) {
             let vitalSacrifice;
             if (itemUses === 0) { 
                 vitalSacrifice = await bloodHunter.vitalSacrificePrompt(workflow, actor, token, item, true, false, true, true);

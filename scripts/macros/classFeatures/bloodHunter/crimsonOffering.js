@@ -1,4 +1,4 @@
-import { bloodHunter } from "../../../bloodHunter.js";
+import { bloodHunter } from "./bloodHunter.js";
 import { constants } from "../../../constants.js";
 import { helpers } from "../../../helpers.js";
 

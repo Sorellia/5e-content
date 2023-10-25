@@ -1,3 +1,11 @@
+# 0.5.55 Release:
+And here comes that sneaky final blood hunter release! This is the actual final version this time, carrying support for the order of salt and iron's unique features (including its interaction with rests). To make the most of these features the Rest Recovery module is needed.
+
+A bit of a small one. Next update will include the savant's first features.
+
+## New Content:
+* The order of salt and iron is fully implemented with all features accounted for.
+
 # 0.5.5 Release:
 The final phase of the blood hunter release is here! This is the final version, bringing in the final 3 Rites (Decay, Exposure and Revelation), as well as the Crimson Offering and Crimson Brand class features and their upgrades. With these, the core blood hunter is finished, and work can begin on v0.6 - the Savant update (another class by LaserLlama).
 

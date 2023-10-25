@@ -46,20 +46,38 @@ export let helpers = {
     'getFeature': function _getFeature(actor, featureName) {
         return actor.items.getName(featureName);
     },
-    'updateItemUses': async function _updateItemUses(token, item, delta) {
-        let updates = {
-            'embedded': {
-                'Item': {
-                    [item.name]: {
-                        'system': {
-                            'uses': {
-                                'value': item.system.uses.value + delta
+    'updateItemUses': async function _updateItemUses(token, item, delta, updateMax = false) {
+        let updates;
+        if (!updateMax) {
+            updates = {
+                'embedded': {
+                    'Item': {
+                        [item.name]: {
+                            'system': {
+                                'uses': {
+                                    'value': item.system.uses.value + delta
+                                }
                             }
                         }
                     }
                 }
-            }
-        };
+            };
+        } else {
+            updates = {
+                'embedded': {
+                    'Item': {
+                        [item.name]: {
+                            'system': {
+                                'uses': {
+                                    'value': item.system.uses.value + delta,
+                                    'max': parseInt(item.system.uses.max) + delta
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+        }
         let options = {
             'permanent': true,
             'name': item.name
@@ -104,6 +122,24 @@ export let helpers = {
             updates._id = effect.id;
             await MidiQOL.socket().executeAsGM('updateEffects', {'actorUuid': effect.parent.uuid, 'updates': [updates]});
         }
+    },
+    'addCondition': async function _addCondition(actor, name, overlay, origin) {
+        await game.dfreds.effectInterface.addEffect(
+            {
+                'effectName': name,
+                'uuid': actor.uuid,
+                'origin': origin,
+                'overlay': overlay
+            }
+        );
+    },
+    'removeCondition': async function _removeCondition(actor, name) {
+        await game.dfreds.effectInterface.removeEffect(
+            {
+                'effectName': name,
+                'uuid': actor.uuid
+            }
+        );
     },
     'applyDamage': async function _applyDamage(tokenList, damageValue, damageType) {
         let targets;

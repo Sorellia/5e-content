@@ -1,5 +1,5 @@
 import { helpers } from "../../../../helpers.js";
-import { bloodHunter } from "../../../../bloodHunter.js";
+import { bloodHunter } from "../bloodHunter.js";
 
 async function damage(workflow) {
     let args = workflow.args;
