@@ -1,4 +1,4 @@
-import { bloodHunter } from "../bloodHunter"
+import { bloodHunter } from "../bloodHunter.js"
 
 async function onUse({actor, item, token, workflow}) {
     if (item.system.uses.value === 0) {
@@ -8,6 +8,6 @@ async function onUse({actor, item, token, workflow}) {
     }
 }
 
-export let spectralnature = {
+export let spectralNature = {
     'onUse': onUse
 }
