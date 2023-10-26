@@ -527,19 +527,31 @@ export let bloodHunter = {
                 let dvMessage;
                 let rollButtons = [];
                 if (dr.size != 0) {
-                    if (dr.size === 1) drMessage = `<b>1</b> resistance`;
-                    else drMessage = `<b>${dr.size}</b> resistances`;
-                    rollButtons.push(['Resistances', 'dr']);
+                    if (dr.size === 1) {
+                        drMessage = `<b>1</b> resistance`;
+                        rollButtons.push(['Resistance', 'dr']);
+                    } else {
+                        drMessage = `<b>${dr.size}</b> resistances`;
+                        rollButtons.push(['Resistances', 'dr']);
+                    }
                 }
                 if (di.size != 0) {
-                    if (di.size === 1) diMessage = `<b>1</b> immunity`;
-                    else diMessage = `<b>${di.size}</b> immunities`;
-                    rollButtons.push(['Immunities', 'di']);
+                    if (di.size === 1) {
+                        diMessage = `<b>1</b> immunity`;
+                        rollButtons.push(['Immunity', 'di']);
+                    } else {
+                        diMessage = `<b>${di.size}</b> immunities`;
+                        rollButtons.push(['Immunities', 'di']);
+                    }
                 }
                 if (dv.size != 0) {
-                    if (dv.size === 1) dvMessage = `<b>1</b> vulnerabilty`;
-                    else dvMessage = `<b>${dv.size}</b> vulnerabilties`;
-                    rollButtons.push(['Vulnerabilities', 'dv']);
+                    if (dv.size === 1) {
+                        dvMessage = `<b>1</b> vulnerabilty`;
+                        rollButtons.push(['Vulnerabilities', 'dv']);
+                    } else {
+                        dvMessage = `<b>${dv.size}</b> vulnerabilties`;
+                        rollButtons.push(['Vulnerabilities', 'dv']);
+                    }
                 }
 
                 if (drMessage && diMessage && !dvMessage) {
@@ -552,7 +564,7 @@ export let bloodHunter = {
                     drivMessage = drivMessage + drMessage;
                 } else if (!drMessage && diMessage && !dvMessage) {
                     drivMessage = drivMessage + diMessage;
-                } else if (!drMessage && diMessage && dvMessage) {
+                } else if (!drMessage && !diMessage && dvMessage) {
                     drivMessage = drivMessage + dvMessage;
                 } else if (drMessage && diMessage && dvMessage) {
                     drivMessage = drivMessage + drMessage + ', ' + diMessage + ' and ' + dvMessage;
@@ -589,7 +601,10 @@ export let bloodHunter = {
                     }
 
                     let invokedMessage = 'You may choose one of the following traits to randomly dispel using your rite; doing so will turn that trait into resistance if it is an immunity, or remove it entirely.';
-                    if (invokedRollButtons.length === 0) await helpers.dialog('No Trait', [['Ok', true]], 'The target has no traits of either type for you to dispel.');
+                    if (invokedRollButtons.length === 0) {
+                        await helpers.dialog('No Trait', [['Ok', true]], 'The target has no traits of either type for you to dispel.');
+                        return;
+                    }
                     let drdi;
                     if (choice === 'dr') drdi = 'damage resistance';
                     else if (choice === 'di') drdi = 'damage immunity';

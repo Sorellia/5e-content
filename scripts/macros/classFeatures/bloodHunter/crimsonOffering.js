@@ -40,7 +40,7 @@ export let crimsonOffering = {
         let tokenDoc = token.document;
         let generatedMenu = [];
         actor.items.forEach(item => {
-            if (item.type === 'weapon' && item.system.equipped) {
+            if (item.type === 'weapon' && item.system.equipped && !(item.name === 'Unarmed Strike')) {
                 generatedMenu.push([item.name, item.id]);
             }
         });
