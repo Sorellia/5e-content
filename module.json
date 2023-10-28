@@ -43,6 +43,14 @@
       }
     },
     {
+      "id": "rest-recovery",
+      "type": "module",
+      "manifest": "https://github.com/fantasycalendar/FoundryVTT-RestRecovery/releases/latest/download/module.json",
+      "compatibility": {
+        "verified": "10.0.0"
+      }
+    },
+    {
       "id": "warpgate",
       "type": "module",
       "manifest": "https://github.com/trioderegion/warpgate/releases/latest/download/module.json",
