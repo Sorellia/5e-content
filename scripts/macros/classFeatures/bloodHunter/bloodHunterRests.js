@@ -1,7 +1,6 @@
 import { helpers } from "../../../helpers.js";
 
 async function rest(actor) {
-    console.log("Rest complete");
     let curseSpecialist = helpers.getFeature(actor, 'Curse Specialist');
     if (curseSpecialist) {
         let previousRite = actor.getFlag('5e-content', 'curseSpecialist');

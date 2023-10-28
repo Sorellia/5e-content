@@ -46,6 +46,146 @@ export let helpers = {
     'getFeature': function _getFeature(actor, featureName) {
         return actor.items.getName(featureName);
     },
+    'updateSkillProf': async function _updateSkillProf(actor, skillName, proficiency = 'proficient') {
+        switch (proficiency) {
+            case 'proficient':
+                proficiency = 1;
+                break;
+            case 'expertise':
+                proficiency = 2;
+                break;
+            case 'half':
+                proficiency = 0.5;
+                break;
+            case 'untrained':
+                proficiency = 0;
+                break;
+            default:
+                break;
+        }
+        switch (skillName) {
+            case 'Acrobatics':
+                skillName = 'acr';
+                break;
+            case 'Animal Handling':
+                skillName = 'ani';
+                break;
+            case 'Arcana':
+                skillName = 'arc';
+                break;
+            case 'Athletics':
+                skillName = 'ath';
+                break;
+            case 'Deception':
+                skillName = 'dec';
+                break;
+            case 'History':
+                skillName = 'his';
+                break;
+            case 'Insight':
+                skillName = 'ins';
+                break;
+            case 'Intimidation':
+                skillName = 'itm';
+                break;
+            case 'Investigation':
+                skillName = 'inv';
+                break;
+            case 'Medicine':
+                skillName = 'med';
+                break;
+            case 'Nature':
+                skillName = 'nat';
+                break;
+            case 'Perception':
+                skillName = 'prc';
+                break;
+            case 'Performance':
+                skillName = 'prf';
+                break;
+            case 'Persuasion':
+                skillName = 'per';
+                break;
+            case 'Religion':
+                skillName = 'rel';
+                break;
+            case 'Sleight of Hand':
+                skillName = 'slt';
+                break;
+            case 'Stealth':
+                skillName = 'ste';
+                break;
+            case 'Survival':
+                skillName = 'sur';
+                break;
+            default:
+                break;
+        }
+
+        await actor.update({[`system.skills.${skillName}.value`]: proficiency});
+    },
+    'updateToolProf': async function _updateToolProf(actor, toolName, proficiency = 'proficient') {
+        switch (proficiency) {
+            case 'proficient':
+                proficiency = 1;
+                break;
+            case 'expertise':
+                proficiency = 2;
+                break;
+            case 'half':
+                proficiency = 0.5;
+                break;
+            case 'untrained':
+                proficiency = 0;
+                break;
+            default:
+                break;
+        }
+        if (proficiency != 'remove') await actor.update({[`system.tools.${toolName}.value`]: proficiency});
+        else await actor.update({[`system.tools.-=${toolName}`]: proficiency});
+    },
+    'updateLanguages': async function _updateLanguages(actor, language, remove = false) {
+        let languageData = [], actorLanguages = actor.system.traits.languages.value;
+        const iterator = actorLanguages.entries();
+
+        for (const entry of iterator) {
+            let entryLabel = entry[0];
+            if (remove) {
+                if (entryLabel != language) {
+                    languageData.push(entryLabel);
+                }
+            } else {
+                languageData.push(entryLabel);
+            }
+        }
+
+        if (!remove) {
+            languageData.push(language);
+        }
+
+        await actor.update({[`system.traits.languages.value`]: languageData});
+    },
+    'updateWeaponProf': async function _updateWeaponProf(actor, weapon, addOrRemove = 'add') {
+        let weaponData = [], actorWeapons = actor.system.traits.weaponProf.value;
+        const iterator = actorWeapons.entries();
+
+        for (const entry of iterator) {
+            let entryLabel = entry[0];
+            if (addOrRemove === 'remove') {
+                if (entryLabel != weapon) {
+                    weaponData.push(entryLabel);
+                }
+            } else {
+                weaponData.push(entryLabel);
+            }
+        }
+
+        if (addOrRemove === 'add') {
+            weaponData.push(weapon);
+        }
+
+        await actor.update({[`system.traits.weaponProf.value`]: weaponData});
+    },
     'updateItemUses': async function _updateItemUses(token, item, delta, updateMax = false) {
         let updates;
         if (!updateMax) {

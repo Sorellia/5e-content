@@ -33,7 +33,7 @@ async function reactionDefense(workflow) {
             let selection = await helpers.remoteDialog('Rite of Blindness', constants.yesNo, firstOwner.id, message, 'row');
             if (!selection) continue;
             await token.actor.setFlag('5e-content', 'blindness.target', workflow.tokenUuid);
-            await helpers.addCondition(targetToken.actor, 'Reaction', false);
+            await helpers.addCondition(token.actor, 'Reaction', false);
             itemUse = await originItem.use();
             if (itemUse) {
                 sourceActor = token.actor;

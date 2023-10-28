@@ -201,10 +201,8 @@ export let crimsonOffering = {
         }
         let target = fromUuidSync(hitTargets[0]);
         await helpers.createEffect(target.actor, effectData);
-        console.log(actor);
-        console.log(args);
     },
-    'brandDamage': async function _brandDamage({speaker, actor, token, character, item, args}) {
+    'brandDamage': async function _brandDamage({actor, token, args}) {
         args = args[0];
         let hitTargets = args.hitTargetUuids;
         if (hitTargets.length === 0) return;

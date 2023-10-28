@@ -6,6 +6,7 @@ import { riteOfDecay } from './macros/classFeatures/bloodHunter/rites/riteOfDeca
 import { riteOfMarking } from './macros/classFeatures/bloodHunter/rites/riteOfMarking.js';
 import { riteOfSiphoning } from './macros/classFeatures/bloodHunter/rites/riteOfSiphoning.js';
 import { sacrificialOffering } from './macros/classFeatures/bloodHunter/orderOfSaltAndIron/sacrificialOffering.js';
+import { savant } from './macros/classFeatures/savant/savant.js';
 import { spectralNature } from './macros/classFeatures/bloodHunter/orderOfSaltAndIron/spectralNature.js';
 import { warriorExorcist } from './macros/classFeatures/bloodHunter/orderOfSaltAndIron/warriorExorcist.js';
 
@@ -19,5 +20,7 @@ export let macros = {
     'riteOfSiphoning': riteOfSiphoning,
     'sacrificialOffering': sacrificialOffering,
     'spectralNature': spectralNature,
-    'warriorExorcist': warriorExorcist
+    'warriorExorcist': warriorExorcist,
+    // Savant macro exports
+    'savant': savant
 }

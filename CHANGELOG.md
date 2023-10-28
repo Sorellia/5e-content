@@ -1,3 +1,24 @@
+# 0.6 Release:
+Heeeeere comes the Savant! A much simpler class to work with than blood hunter, but with a surprising amount automate all the same!. Also contained are a bunch of updates to blood hunter that I forgot!
+
+This release brings in the core savant features + rune scribe's student of runes (partial automation); the scholarly pursuits and the rest of my player's savant subclass (Rune Scribe) are not yet automated, but are coming.
+
+Also upcoming are features for the Baldur's Gate 3 Weapon Actions.
+
+## New Content:
+* Core Savant has been fully automated; every feature is completely automated where possible; the bucket-list is vast, but the standout feature is by far Adroit Analysis, which has you mark a target and then turns your weapon attacks into int scaling when attacking that target.
+
+## Bug Fixes:
+* Forgot to implement vital sacrifice automation for spectral nature...
+* Then forgot to bug fix spectral nature's includes and it didn't work... D'oh!
+* Rite of blindness now correctly gives the reaction to the Blood Hunter using it!
+
+## Update Notes
+* Spectral Nature has been automated, and several bugs fixed with other parts of blood hunter automation; more will be fixed as the class sees use in my campaign.
+* Savant is mostly implemented as its core features have received automation; the rest of the class needs automating, but won't be quite as bad.
+* Several console declarations have been removed to tidy things up a bit.
+* The helper code has been updated with various functions used to aid in savant's more 'broad' applications, such of tool, skill, language and weapon proficiency adjustments.
+
 # 0.5.55 Release:
 And here comes that sneaky final blood hunter release! This is the actual final version this time, carrying support for the order of salt and iron's unique features (including its interaction with rests). To make the most of these features the Rest Recovery module is needed.
 
