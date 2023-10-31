@@ -16,7 +16,7 @@ Further updates are expected to start adding parts of rune scribe, as well as po
 * Several updates to Savant at large, to quash a few bugs.
 
 # 0.6 Release:
-Heeeeere comes the Savant! A much simpler class to work with than blood hunter, but with a surprising amount automate all the same! Also contained are a bunch of updates to blood hunter that I forgot!
+Heeeeere comes the Savant! A much simpler class to work with than blood hunter, but with a surprising amount to automate all the same! Also contained are a bunch of updates to blood hunter that I forgot!
 
 This release brings in the core savant features + rune scribe's student of runes (partial automation); the scholarly pursuits and the rest of my player's savant subclass (Rune Scribe) are not yet automated, but are coming.
 
