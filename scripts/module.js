@@ -6,7 +6,10 @@ import { queue } from './utility/queue.js';
 import { registerFeatures } from './customFeatures.js';
 import { remoteAimCrosshair, remoteDialog, remoteDocumentDialog, remoteDocumentsDialog, remoteMenu } from './utility/remoteDialog.js';
 import { rest, preRest } from './utility/restListener.js';
-import { itemCreationHandler, itemUpdateHandler } from './itemHandler.js';
+import { savantItemCreationHandler, savantItemUpdateHandler } from './macros/classFeatures/savant/savantItemHandler.js';
+import { scholarlyPursuitCreationManager } from './macros/classFeatures/savant/scholarlyPursuits/scholarlyPursuits.js';
+import { levelUpHandler } from './classLevelupHandler.js';
+import { skillToolRoll } from './utility/skillToolListener.js';
 export let socket;
 
 Hooks.once('init', async function() {
@@ -26,8 +29,10 @@ Hooks.once('socketlib.ready', async function() {
 
 Hooks.once('ready', async function () {
 	console.log("5e Content | Registering Automation Hooks");
+	// Blood Hunter Hooks
 	Hooks.on('midi-qol.damageApplied', macros.sacrificialOffering.onDamage);
 	Hooks.on('midi-qol.preAttackRoll', macros.riteOfBlindness.reactionDefense);
+	// Savant Hooks
 	Hooks.on('midi-qol.preAttackRoll', macros.savant.adroitAnalysis.intSubstitute);
 	Hooks.on('midi-qol.damageApplied', macros.savant.adroitAnalysis.onDamage);
 	Hooks.on('midi-qol.preAttackRoll', macros.savant.adroitAnalysis.markAttackDisadvantage);
@@ -35,13 +40,19 @@ Hooks.once('ready', async function () {
 	Hooks.on('midi-qol.preCheckSaves', macros.savant.flashOfBrilliance.preSave);
 	Hooks.on('midi-qol.preDamageRoll', macros.savant.adroitAnalysis.preDamage);
 	Hooks.on('midi-qol.preDamageRoll', macros.savant.adroitAnalysis.selfDamageBuffs);
-	Hooks.on('createItem', itemCreationHandler);
-	Hooks.on('updateItem', itemUpdateHandler);
+	Hooks.on('createItem', savantItemCreationHandler);
+	Hooks.on('createItem', scholarlyPursuitCreationManager)
+	Hooks.on('updateItem', savantItemUpdateHandler);
 	Hooks.on('updateActor', macros.savant.acceleratedReflexes.intHandler);
 	Hooks.on('updateActor', macros.savant.predictiveDefense.intHandler);
+	Hooks.on('updateActor', macros.linguistics.intHandler);
 	Hooks.on('createActiveEffect', macros.savant.acceleratedReflexes.reactionHandler);
+	Hooks.on('dnd5e.rollSkill', skillToolRoll);
+	Hooks.on('dnd5e.rollToolCheck', skillToolRoll);
+	// Generic Hooks
 	Hooks.on('dnd5e.restCompleted', rest);
 	Hooks.on('closePromptRestDialog', preRest);
+	Hooks.on('updateItem', levelUpHandler);
 });
 
 globalThis['sorelliaAutomations'] = {

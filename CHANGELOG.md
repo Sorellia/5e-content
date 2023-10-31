@@ -1,5 +1,22 @@
+# 0.6.1 Release:
+Stage 2 of the Savant! At this point, every core part of the class is in. The subclass is still to come however. For once, no updates to the blood hunter were warranted!
+
+Further updates are expected to start adding parts of rune scribe, as well as port over a couple of cleric features and some other house rule stuff I'm using, including BG3 Weapon Actions.
+
+## New Content:
+* Savant has received numerous fixes and all of the scholarly pursuits which can be automated, have been.
+* The start of a system for automatically handling class/race proficiencies and such is in, too.
+
+## Bug Fixes:
+* Quite a few with Savant! Namely within Quick Study and some streamlining to handle the meditation scholarly pursuit.
+
+## Update Notes:
+* Quick Study now correctly understands that *yes*, vehicle proficiences *ARE* in fact counted as tools in 5e...
+* Implementation for all automateable scholarly pursuits, including handing out skills, proficiencies, languages and the like.
+* Several updates to Savant at large, to quash a few bugs.
+
 # 0.6 Release:
-Heeeeere comes the Savant! A much simpler class to work with than blood hunter, but with a surprising amount automate all the same!. Also contained are a bunch of updates to blood hunter that I forgot!
+Heeeeere comes the Savant! A much simpler class to work with than blood hunter, but with a surprising amount automate all the same! Also contained are a bunch of updates to blood hunter that I forgot!
 
 This release brings in the core savant features + rune scribe's student of runes (partial automation); the scholarly pursuits and the rest of my player's savant subclass (Rune Scribe) are not yet automated, but are coming.
 

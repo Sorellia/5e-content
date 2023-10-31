@@ -9,6 +9,8 @@ import { sacrificialOffering } from './macros/classFeatures/bloodHunter/orderOfS
 import { savant } from './macros/classFeatures/savant/savant.js';
 import { spectralNature } from './macros/classFeatures/bloodHunter/orderOfSaltAndIron/spectralNature.js';
 import { warriorExorcist } from './macros/classFeatures/bloodHunter/orderOfSaltAndIron/warriorExorcist.js';
+import { linguistics } from './macros/classFeatures/savant/scholarlyPursuits/linguistics.js';
+import { instruction } from './macros/classFeatures/savant/scholarlyPursuits/instruction.js';
 
 export let macros = {
     // Blood Hunter macro exports
@@ -22,5 +24,7 @@ export let macros = {
     'spectralNature': spectralNature,
     'warriorExorcist': warriorExorcist,
     // Savant macro exports
-    'savant': savant
+    'savant': savant,
+    'linguistics': linguistics,
+    'instruction': instruction
 }

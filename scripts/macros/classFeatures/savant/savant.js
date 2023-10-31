@@ -19,7 +19,7 @@ let adroitAnalysis = {
         if (!savantHelpers.isMark(token)) return;
         workflow.disadvantage = true;
     },
-    'intSubstitute': async function _intSubstitute(workflow) {
+    'intSubstitute': async function _intSubstitute(workflow, marksmanship = false) {
         let target = workflow.targets;
         let actor = workflow.actor;
         let adroitAnalysis = helpers.getFeature(actor, 'Adroit Analysis');
@@ -31,13 +31,28 @@ let adroitAnalysis = {
         target = target.document;
         let finesse = item.system.properties.fin ?? false;
         if (!savantHelpers.isMark(target)) return;
-        console.log(item);
         if (!finesse) if (actor.system.abilities.int.mod > actor.system.abilities.str.mod) workflow.item.system.ability = 'int';
         if (finesse) {
             let bestAttack;
             if (actor.system.abilities.dex.mod > actor.system.abilities.str.mod) bestAttack = actor.system.abilities.dex.mod;
             else bestAttack = actor.system.abilities.str.mod;
             if (actor.system.abilities.int.mod > bestAttack) workflow.item.system.ability = 'int';
+        }
+        if (marksmanship) {
+            let savantDie = actor.getFlag('5e-content', 'savant.intellectDie.formula'), damageParts = item.system.damage.parts[0], savantDamage;
+            if (item.name.includes('Blowgun')) {
+                savantDamage = [`${savantDie} + @mod`, damageParts[1]];
+                workflow.item.system.damage.parts[0] = savantDamage;
+            } else {
+                let regex = /(\d*)(D\d*)((?:[+*-](?:\d+|\([A-Z]*\)))*)(?:\+(D\d*))?/gi;
+                let itemDamage = damageParts[0].match(regex);
+                itemDamage = await new Roll(itemDamage[0]);
+                let savantFaces = actor.getFlag('5e-content', 'savant.intellectDie.faces');
+                if (savantFaces > itemDamage.dice[0].faces) {
+                    savantDamage = [`${savantDie} + @mod`, damageParts[1]];
+                    workflow.item.system.damage.parts[0] = savantDamage;
+                }
+            }
         }
     },
     'preDamage': async function _preDamage(workflow) {
@@ -74,11 +89,11 @@ let adroitAnalysis = {
                     let selection = await helpers.remoteDialog(titleMessage, constants.yesNo, firstOwner.id, message);
                     if (!selection) continue;
                     await helpers.addCondition(token.actor, 'Reaction', false);
-                    savantDie = savantHelpers.getIntellectDie(token.actor, true);
+                    savantDie = token.actor.getFlag('5e-content', 'savant.intellectDie.formula');
                     if (potentObservation) savantDie = '2' + savantDie + 'kh1';
                 }
             } else {
-                savantDie = savantHelpers.getIntellectDie(actor, true);
+                savantDie = actor.getFlag('5e-content', 'savant.intellectDie.formula');
             }
             await helpers.clearThirdPartyReactionMessage();
     
@@ -124,7 +139,7 @@ let adroitAnalysis = {
                 let selection = await helpers.remoteDialog('Potent Observation', constants.yesNo, firstOwner.id, message);
                 if (!selection) continue;
                 await helpers.addCondition(token.actor, 'Reaction', false);
-                savantDie = savantHelpers.getIntellectDie(token.actor, true);
+                savantDie = token.actor.getFlag('5e-content', 'savant.intellectDie.formula');
                 potentObservation = helpers.getFeature(token.actor, 'Potent Observation');
             }
             await helpers.clearThirdPartyReactionMessage();
@@ -153,14 +168,16 @@ let adroitAnalysis = {
         }
     },
     'selfDamageBuffs': async function _selfDamageBuffs(workflow) {
-        await adroitAnalysis.intSubstitute(workflow);
+        let marksmanshipWeaponTypes = ['martialR'];
+        if (marksmanshipWeaponTypes.includes(workflow.item.system.weaponType) && helpers.getFeature(workflow.actor, 'Marksmanship')) await adroitAnalysis.intSubstitute(workflow, true);
+        else await adroitAnalysis.intSubstitute(workflow);
     },
     'onDamage': async function _onDamage(target, {workflow}) {
         let actor = workflow.actor;
         let targets = workflow.hitTargets;
         if (targets.size != 1 || !helpers.getFeature(actor, 'Adroit Analysis')) return;
         target = target.document;
-        if (!savantHelpers.isMark(target)) return;
+        if (!savantHelpers.isMark(target) || !savantHelpers.isMarkSource(target, workflow.token)) return;
         await promptAdroitInformation(target.actor);
     },
     'preSave': async function _preSave(workflow) {

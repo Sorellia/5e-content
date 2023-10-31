@@ -1,15 +1,15 @@
-import { helpers } from "./helpers.js";
-import { quickStudy } from "./macros/classFeatures/savant/quickStudy.js";
+import { helpers } from "../../../helpers.js";
+import { quickStudy } from "./quickStudy.js";
 
-export async function itemCreationHandler(item) {
+export async function savantItemCreationHandler(item) {
     let ownerActor = item.parent;
     switch (item.name) {
         case 'Wondrous Intellect':
             let wondrousIntellectUpdates = {
-                'system.abilities.int.bonuses.check': '@scale.savant.intellect-die',
-                'system.abilities.int.bonuses.save': '@scale.savant.intellect-die',
-                'system.abilities.wis.bonuses.check': '@scale.savant.intellect-die',
-                'system.abilities.wis.bonuses.save': '@scale.savant.intellect-die'
+                'system.abilities.int.bonuses.check': '@flags.5e-content.savant.intellectDie.formula',
+                'system.abilities.int.bonuses.save': '@flags.5e-content.savant.intellectDie.formula',
+                'system.abilities.wis.bonuses.check': '@flags.5e-content.savant.intellectDie.formula',
+                'system.abilities.wis.bonuses.save': '@flags.5e-content.savant.intellectDie.formula'
             }
 
             await ownerActor.update(wondrousIntellectUpdates);
@@ -38,7 +38,7 @@ export async function itemCreationHandler(item) {
         case 'Unyielding Will':
             let unyieldingWillUpdates = {
                 'system.abilities.cha.proficient': 1,
-                'system.abilities.cha.bonuses.save': '@scale.savant.intellect-die',
+                'system.abilities.cha.bonuses.save': '@flags.5e-content.savant.intellectDie.formula',
                 'flags.midi-qol.superSaver.int': 1,
                 'flags.midi-qol.superSaver.wis': 1,
                 'flags.midi-qol.superSaver.cha': 1
@@ -54,9 +54,10 @@ export async function itemCreationHandler(item) {
     }
 }
 
-export async function itemUpdateHandler(item, changes) {
+export async function savantItemUpdateHandler(item, changes) {
     let equipped = changes.system?.equipped ?? false;
     let ownerActor = item.parent;
+    if (!ownerActor) return;
     let armorTypes = ['light', 'medium', 'heavy'];
     let armorType = item.system.armor?.type ?? 'undefined'
     if (!helpers.getFeature(ownerActor, 'Predictive Defense') || !armorTypes.includes(armorType)) return;

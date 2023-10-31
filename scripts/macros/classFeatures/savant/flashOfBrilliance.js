@@ -30,7 +30,7 @@ async function preSave(workflow) {
             let selection = await helpers.remoteDialog('Flash of Brilliance', constants.yesNo, firstOwner.id, message);
             if (!selection) continue;
             await helpers.addCondition(token.actor, 'Reaction', false);
-            savantDie = savantHelpers.getIntellectDie(token.actor, true);
+            savantDie = token.actor.getFlag('5e-content', 'savant.intellectDie.formula');
         }
         await helpers.clearThirdPartyReactionMessage();
 
