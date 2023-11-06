@@ -1,4 +1,10 @@
 # 0.6.1 Release:
+No savant improvements here, but instead the basics of talents are in! BG3 weapon actions and the cleric stuff is to come as well, but that'll be tomorrow. For now, here's some talents; mostly data entry now. This system serves to replace feats.
+
+## New Content:
+* Literally hundreds of new talent feats are written and implemented, and the system for talent point gaining (and storing) is implemented in the code as well.
+
+# 0.6.1 Release:
 Stage 2 of the Savant! At this point, every core part of the class is in. The subclass is still to come however. For once, no updates to the blood hunter were warranted!
 
 Further updates are expected to start adding parts of rune scribe, as well as port over a couple of cleric features and some other house rule stuff I'm using, including BG3 Weapon Actions.

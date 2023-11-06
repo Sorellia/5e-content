@@ -10,6 +10,7 @@ import { savantItemCreationHandler, savantItemUpdateHandler } from './macros/cla
 import { scholarlyPursuitCreationManager } from './macros/classFeatures/savant/scholarlyPursuits/scholarlyPursuits.js';
 import { levelUpHandler } from './classLevelupHandler.js';
 import { skillToolRoll } from './utility/skillToolListener.js';
+import { talentTreeLevelupHandler } from './macros/variantRules/talentTrees.js';
 export let socket;
 
 Hooks.once('init', async function() {
@@ -53,6 +54,7 @@ Hooks.once('ready', async function () {
 	Hooks.on('dnd5e.restCompleted', rest);
 	Hooks.on('closePromptRestDialog', preRest);
 	Hooks.on('updateItem', levelUpHandler);
+	Hooks.on('dnd5e.advancementManagerComplete', talentTreeLevelupHandler);
 });
 
 globalThis['sorelliaAutomations'] = {

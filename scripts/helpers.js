@@ -47,7 +47,7 @@ export let helpers = {
         return actor.items.getName(featureName);
     },
     'updateSkillProf': async function _updateSkillProf(actor, skillName, proficiency = 'proficient') {
-        switch (proficiency) {
+        switch (proficiency.toLowerCase()) {
             case 'proficient':
                 proficiency = 1;
                 break;
