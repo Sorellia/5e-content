@@ -106,7 +106,7 @@ async function chooseSpecialtyTalentCategory(actor, specialty = false) {
     
         switch (specialtyChoice) {
             case 'Adventuring':
-                specialtyChoice = await helpers.dialog('Adventuring Categories', [['A Friend So Nice', 'A Friend So Nice'], ['A Little Extra Life', 'A Little Extra Life']], 'Select a category of Adventuring talents you would like to pick from');
+                specialtyChoice = await helpers.dialog('Adventuring Categories', [['A Friend So Nice', 'A Friend So Nice'], ['A Little Extra Life', 'A Little Extra Life'], ['A Mind Most Clear', 'A Mind Most Clear']], 'Select a category of Adventuring talents you would like to pick from', 'column');
                 break;
             case 'Weapon Specialization':
                 let weaponSpec = await helpers.dialog('Weapon Specialization', [['One Major', 'major'], ['Two Intermediate', 'intermed'], ['One Intermediate and One Minor', 'interminor'], ['Three Minor', 'minor']], 'You can select weapon talents from within the <b>Major, Intermediate</b> and <b>Minor</b> categories, using one of the four options below. Pick your preference.', 'column');
@@ -153,7 +153,7 @@ async function chooseSpecialtyTalentCategory(actor, specialty = false) {
 }
 
 async function handleEntryTalents(actor, talentCategory, talentType, talentName) {
-    let unnecessaryTalentTypes = ['A Friend So Nice', 'A Little Extra Life', 'Apprenticeship', 'War Magic'], bannedTalentNames = ['Weapon Improvisation'];
+    let unnecessaryTalentTypes = ['A Friend So Nice', 'A Little Extra Life', 'A Mind Most Clear', 'Apprenticeship', 'War Magic'], bannedTalentNames = ['Weapon Improvisation'];
     if (talentCategory === 'specialty' && !unnecessaryTalentTypes.includes(talentType) && !bannedTalentNames.includes(talentName)) {
         let choice = await helpers.dialog('Entry Talent', constants.yesNo, 'The talent you have selected is an entrance talent, have you chosen everything you wish to choose from it already?');
         if (!choice) return;

@@ -50,6 +50,12 @@ Hooks.once('ready', async function () {
 	Hooks.on('createActiveEffect', macros.savant.acceleratedReflexes.reactionHandler);
 	Hooks.on('dnd5e.rollSkill', skillToolRoll);
 	Hooks.on('dnd5e.rollToolCheck', skillToolRoll);
+	// Baldurs Gate 3 Weapon Actions
+	Hooks.on('preUpdateItem', macros.bg3.addFeatures);
+	Hooks.on('preDeleteItem', macros.bg3.removeFeatures);
+	Hooks.on('midi-qol.preDamageRollComplete', macros.bg3.piercingStrike.damage);
+	Hooks.on('dnd5e-restCompleted', macros.bg3.rest);
+	Hooks.on('midi-qol.RollComplete', macros.bg3.healing);
 	// Generic Hooks
 	Hooks.on('dnd5e.restCompleted', rest);
 	Hooks.on('closePromptRestDialog', preRest);

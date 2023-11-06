@@ -1,4 +1,12 @@
-# 0.6.1 Release:
+# 0.6.6 Release:
+Small update to this one; a couple of cleric features have been added, as have the bg3 weapon actions with support for adding and removing them, and some additions to the talent system (some new options).
+
+## New Content:
+* New talents in the adventurer specialty (grouped under the new 'A Mind Most Clear' category.)
+* Implementation of all BG3 weapon actions with more than sufficient automation for the time being.
+* Implementation of the Harness Divine Power and Turn Undead cleric features.
+
+# 0.6.5 Release:
 No savant improvements here, but instead the basics of talents are in! BG3 weapon actions and the cleric stuff is to come as well, but that'll be tomorrow. For now, here's some talents; mostly data entry now. This system serves to replace feats.
 
 ## New Content:

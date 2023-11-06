@@ -175,7 +175,8 @@ let adroitAnalysis = {
     'onDamage': async function _onDamage(target, {workflow}) {
         let actor = workflow.actor;
         let targets = workflow.hitTargets;
-        if (targets.size != 1 || !helpers.getFeature(actor, 'Adroit Analysis')) return;
+        if (!helpers.getFeature(actor, 'Adroit Analysis')) return;
+        if (targets.size != 1) return;
         target = target.document;
         if (!savantHelpers.isMark(target) || !savantHelpers.isMarkSource(target, workflow.token)) return;
         await promptAdroitInformation(target.actor);

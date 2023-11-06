@@ -359,6 +359,116 @@ export let helpers = {
         }
         return itemMod;
     },
+    'selectTarget': async function _selectTarget(title, buttons, targets, returnUuid, type, selectOptions, fixTargets, description, coverToken, reverseCover) {
+        let generatedInputs = [];
+        let isFirst = true;
+        for (let i of targets) {
+            let name = i.document.name;
+            if (coverToken && !reverseCover) {
+                name += ' [' + helpers.checkCover(coverToken, i, undefined, true) + ']';
+            } else if (coverToken) {
+                name += ' [' + helpers.checkCover(i, coverToken, undefined, true) + ']';
+            }
+            let texture = i.document.texture.src;
+            let html = `<img src="` + texture + `" id="` + i.id + `" style="width:40px;height:40px;vertical-align:middle;"><span> ` + name + `</span>`;
+            let value = i.id;
+            if (returnUuid) value = i.document.uuid;
+            if (type === 'multiple') {
+                generatedInputs.push({
+                    'label': html,
+                    'type': 'checkbox',
+                    'options': false,
+                    'value': value
+                });
+            } else if (type === 'one') {
+                generatedInputs.push({
+                    'label': html,
+                    'type': 'radio',
+                    'options': ['group1', isFirst],
+                    'value': value
+                });
+                isFirst = false;
+            } else if (type === 'number') {
+                generatedInputs.push({
+                    'label': html,
+                    'type': 'number'
+                });
+            } else if (type === 'select') {
+                generatedInputs.push({
+                    'label': html,
+                    'type': 'select',
+                    'options': selectOptions,
+                    'value': value
+                });
+            } else return {'buttons': false};
+        }
+        if (fixTargets) {
+            generatedInputs.push({
+                'label': 'Skip Dead & Unconscious?',
+                'type': 'checkbox',
+                'options': true,
+                'value': true
+            });
+        }
+        if (description) generatedInputs.unshift({
+            'label': description,
+            'type': 'info'
+        });
+        function dialogRender(html) {
+            let trs = html[0].getElementsByTagName('tr');
+            if (type != 'select') {
+                for (let t of trs) {
+                    t.style.display = 'flex';
+                    t.style.flexFlow = 'row-reverse';
+                    t.style.alignItems = 'center';
+                    t.style.justifyContent = 'flex-end';
+                    if (type === 'one') t.addEventListener('click', function () {t.getElementsByTagName('input')[0].checked = true});
+                }
+            }
+            let ths = html[0].getElementsByTagName('th');
+            for (let t of ths) {
+                t.style.width = 'auto';
+                t.style.textAlign = 'left';
+            }
+            let tds = html[0].getElementsByTagName('td');
+            for (let t of tds) {
+                t.style.textAlign = 'center';
+                t.style.paddingRight = '5px';
+                if (t.attributes?.colspan?.value == 2) continue;
+                t.style.width = '50px';
+            }
+            let imgs = html[0].getElementsByTagName('img');
+            for (let i of imgs) {
+                i.style.border = 'none';
+                i.addEventListener('click', async function () {
+                    await canvas.ping(canvas.tokens.get(i.getAttribute('id')).document.object.center);
+                });
+                i.addEventListener('mouseover', function () {
+                    let targetToken = canvas.tokens.get(i.getAttribute('id'));
+                    targetToken.hover = true;
+                    targetToken.refresh();
+                });
+                i.addEventListener('mouseout', function () {
+                    let targetToken = canvas.tokens.get(i.getAttribute('id'));
+                    targetToken.hover = false;
+                    targetToken.refresh();
+                });
+            }
+        }
+        let config = {
+            'title': title,
+            'render': dialogRender
+        };
+        let selection = await warpgate.menu({'inputs': generatedInputs, 'buttons': buttons}, config);
+        if (!selection.buttons) return {'buttons': false};
+        if (description) selection.inputs?.shift();
+        if (type != 'number' && type != 'select') {
+            for (let i = 0; i < (!fixTargets ? selection.inputs.length : selection.inputs.length - 1); i++) {
+                if (selection.inputs[i]) selection.inputs[i] =  generatedInputs[description ? i + 1 : i].value;
+            }
+        }
+        return selection;
+    },
     'checkTrait': function _checkTrait(actor, type, trait) {
         return actor.system.traits[type].value.has(trait);
     },
@@ -471,7 +581,7 @@ export let helpers = {
     'itemDuration': function _itemDuration(item) {
         return Date.convertDuration(item.system.duration, helpers.inCombat());
     },
-    'getCriticalFDormula': function _getCriticalFDormula(formula) {
+    'getCriticalFormula': function _getCriticalFDormula(formula) {
         return new CONFIG.Dice.DamageRoll(formula, {}, {'critical': true, 'powerfulCritical': game.settings.get('dnd5e', 'criticalDamageMaxDice'), 'multiplyNumeric': game.settings.get('dnd5e', 'criticalDamageModifiers')}).formula;
     },
     'getSize': function _getSize(actor, sizeToString = false) {
@@ -700,9 +810,6 @@ export let helpers = {
         }
         return returns;
     },
-    'getItem': function _getItem(actor, name) {
-        return actor.items.find(i => i.flags['5e-content']?.info?.name === name);
-    },
     'rollRequest': async function _rollRequest(token, request, ability) {
         let userID = helpers.firstOwner(token).id;
         let data = {
@@ -828,8 +935,8 @@ export let helpers = {
     'addDamageDetailDamage': function _addDamageDetailDamage(targetToken, damageTotal, damageType, workflow) {
         let targetDamage = workflow.damageList.find(t => t.tokenId === targetToken.id);
         let targetActor = targetToken.actor;
-        if (chris.checkTrait(targetActor, 'di', damageType)) return;
-        if (chris.checkTrait(targetActor, 'dr', damageType)) damageTotal = Math.floor(damageTotal / 2);
+        if (helpers.checkTrait(targetActor, 'di', damageType)) return;
+        if (helpers.checkTrait(targetActor, 'dr', damageType)) damageTotal = Math.floor(damageTotal / 2);
         targetDamage.damageDetail[0].push(
             {
                 'damage': damageTotal,
@@ -878,7 +985,7 @@ export let helpers = {
     },
     'thirdPartyReactionMessage': async function _thirdPartyReactionMessage(user) {
         let playerName = user.name;
-        let lastMessage = game.messages.find(m => m.flags?.['chris-premades']?.thirdPartyReactionMessage);
+        let lastMessage = game.messages.find(m => m.flags?.['5e-content']?.thirdPartyReactionMessage);
         let message = '<hr>Waiting for a 3rd party reaction from:<br><b>' + playerName + '</b>';
         if (lastMessage) {
             await lastMessage.update({'content': message});
@@ -889,7 +996,7 @@ export let helpers = {
                 'whisper': game.users.filter(u => u.isGM).map(u => u.id),
                 'blind': false,
                 'flags': {
-                    'chris-premades': {
+                    '5e-content': {
                         'thirdPartyReactionMessage': true
                     }
                 }
@@ -897,13 +1004,16 @@ export let helpers = {
         }
     },
     'clearThirdPartyReactionMessage': async function _clearThirdPartyReactionMessage() {
-        let lastMessage = game.messages.find(m => m.flags?.['chris-premades']?.thirdPartyReactionMessage);
+        let lastMessage = game.messages.find(m => m.flags?.['5e-content']?.thirdPartyReactionMessage);
         if (lastMessage) await lastMessage.delete();
     },
     'lastGM': function _lastGM() {
-        return game.settings.get('chris-premades', 'LastGM');
+        return game.settings.get('5e-content', 'LastGM');
     },
     'isLastGM': function _isLastGM() {
-        return game.user.id === chris.lastGM() ? true : false;
-    }
+        return game.user.id === helpers.lastGM() ? true : false;
+    },
+    'nth': function _nth(number) {
+        return number + ['st','nd','rd'][((number+90)%100-10)%10-1]||'th';
+    },
 }
