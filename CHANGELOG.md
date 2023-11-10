@@ -1,3 +1,12 @@
+# 0.6.65 Release:
+Very small update; several refactors to previous features to make them more universally applicable, and the first additions of talent creation support.
+
+## New Content:
+* Shifted several actor editing features to a distinct helper class, and refactored several features.
+
+## Bug Fixes:
+* Several missed bits and bobs have been patched with bg3 weapon actions and the astrology pursuit.
+
 # 0.6.6 Release:
 Small update to this one; a couple of cleric features have been added, as have the bg3 weapon actions with support for adding and removing them, and some additions to the talent system (some new options).
 

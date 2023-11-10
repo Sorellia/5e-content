@@ -1,6 +1,6 @@
-import { setupIntellectDie } from "../../../../classLevelupHandler.js";
+import { setupIntellectDie } from "../../../../classLevelUpHandler.js";
 import { helpers } from "../../../../helpers.js";
-import { selectLanguage } from "../quickStudy.js";
+import { actorEditorHelpers } from "../../../../utility/actorEditorHelpers.js";
 
 export async function scholarlyPursuitCreationManager(item) {
     let ownerActor = item.parent;
@@ -21,7 +21,7 @@ export async function scholarlyPursuitCreationManager(item) {
             let intMod = ownerActor.system.abilities.int.mod;
             if (intMod < 1) return;
             for (let i = 0; i < intMod; i++) {
-                await selectLanguage(ownerActor, false);
+                await actorEditorHelpers.selectLanguage(actor);
             }
             ownerActor.setFlag('5e-content', 'savant.linguistics.languagesGranted', intMod);
             break;

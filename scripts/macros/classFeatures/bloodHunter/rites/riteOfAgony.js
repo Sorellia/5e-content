@@ -3,7 +3,6 @@ import { bloodHunter } from "../bloodHunter.js";
 
 async function damage(workflow) {
     let args = workflow.args;
-    console.log(args);
     let itemType = args[0].item?.type;
     let targetToken = args[0].tokenUuid;
     let sourceEffect = helpers.findEffect(fromUuidSync(targetToken).actor, 'Rite of Agony');

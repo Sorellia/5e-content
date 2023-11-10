@@ -5,7 +5,7 @@ import { constants } from "../../../../constants.js";
 async function reactionDefense(workflow) {
     let targetToken = workflow.hitTargets;
     if (targetToken.size !== 1) return;
-    targetToken = await helpers.getTargetFromSingleSet(targetToken);
+    targetToken = await helpers.getElementFromSingleSet(targetToken);
     targetToken = targetToken.document;
     let attackingToken = workflow.token.document;
     if (helpers.findEffect(attackingToken.actor, 'Rite of Blindness (Invoked)')) return;
@@ -35,6 +35,7 @@ async function reactionDefense(workflow) {
             await token.actor.setFlag('5e-content', 'blindness.target', workflow.tokenUuid);
             await helpers.addCondition(token.actor, 'Reaction', false);
             itemUse = await originItem.use();
+            //itemUse = await MidiQOL.socket().executeAsUser("completeItemUse", MidiQOL.playerForActor(token.actor).id, {itemData: originItem, actorUuid: token.actor.uuid, options: {showFullCard: true, createWorkflow: true}});
             if (itemUse) {
                 sourceActor = token.actor;
                 break;

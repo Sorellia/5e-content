@@ -100,6 +100,7 @@ async function addFeatures(item, updates, options, id) {
     let baseItem = item.system.baseItem;
     if (!baseItem) return;
     if (!proficient) {
+        proficient = item.actor.system.traits.weaponProf.value.has(baseItem);
         if (simpleWeapons.includes(baseItem) && actor.system.traits.weaponProf.value.has('sim')) proficient = true;
         if (martialWeapons.includes(baseItem) && actor.system.traits.weaponProf.value.has('mar')) proficient = true;
     }
@@ -195,7 +196,7 @@ async function healing(workflow) {
     for (let i of Array.from(workflow.targets)) {
         for (let e of effects) {
             let effect = helpers.findEffect(i.actor, e);
-            if (effect) await helpers.removeEffect(e);
+            if (effect) await helpers.removeEffect(effect);
         }
     }
 }

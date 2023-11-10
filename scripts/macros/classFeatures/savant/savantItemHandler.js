@@ -1,4 +1,5 @@
 import { helpers } from "../../../helpers.js";
+import { actorEditorHelpers } from "../../../utility/actorEditorHelpers.js";
 import { quickStudy } from "./quickStudy.js";
 
 export async function savantItemCreationHandler(item) {
@@ -30,6 +31,7 @@ export async function savantItemCreationHandler(item) {
         case 'Student of Runes':
             await helpers.updateSkillProf(ownerActor, 'History', 'expertise');
             await helpers.updateToolProf(ownerActor, 'calligrapher', 'expertise');
+            await actorEditorHelpers.selectLanguage(ownerActor, ['Draconic', 'Druidic', 'Dwarvish', 'Giant', 'Primordial'], [], 2);
             break;
         case 'Undisputed Genius':
             let intValue = ownerActor.system.abilities.int.value;

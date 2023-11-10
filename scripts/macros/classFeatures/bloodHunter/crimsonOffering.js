@@ -147,10 +147,7 @@ export let crimsonOffering = {
         weapon = actor.items.get(weapon).toObject();
         let crimsonOffering = helpers.getFeature(actor, 'Crimson Offering');
         let crimsonBrand = helpers.getFeature(actor, 'Crimson Brand');
-        if (item._id !== weapon._id) {
-            console.log("LOG | Weapon used to attack is not the one imbued with a crimson offering!");
-            return;
-        }
+        if (item._id !== weapon._id) return;
         if (hitTargets.length != 1 || !crimsonBrand) return;
         canvas.tokens.selectObjects();
         let tokens = canvas.tokens.placeables.filter(t => helpers.findEffect(t.actor, 'Crimson Brand'));

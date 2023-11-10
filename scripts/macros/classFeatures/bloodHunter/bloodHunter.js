@@ -115,7 +115,7 @@ export let bloodHunter = {
     },
     'selectRandomTrait': async function _selectRandomTrait(actor, traitType) {
         let traitArray = actor.system.traits[traitType].value;
-        if (traitArray.size === 1) return await helpers.getTargetFromSingleSet(traitArray);
+        if (traitArray.size === 1) return await helpers.getElementFromSingleSet(traitArray);
         let randomTrait = helpers.getRandomInt(traitArray.size);
         let selectedTrait = Array.from(traitArray);
         selectedTrait = selectedTrait[randomTrait];
@@ -426,10 +426,7 @@ export let bloodHunter = {
                         });
                     }
                 }
-                if (!effectData.changes) {
-                    console.log("EffectData Changes is blank!");
-                    effectData = false;
-                }
+                if (!effectData.changes) effectData = false;
                 break;
             case 'Rite of Exsanguination':
                 if (!invoked) effectData = false;
@@ -864,7 +861,7 @@ export let bloodHunter = {
         let target;
         if (targets.size === 1) { 
             applyRites = true; // If there is exactly 1 target, allow the application of rite effects
-            target = await helpers.getTargetFromSingleSet(targets);
+            target = await helpers.getElementFromSingleSet(targets);
             target = target.document;
         }
         // Pull in the flags for vital sac and vital control; set to false if no flag is present.

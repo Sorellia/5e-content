@@ -12,6 +12,7 @@ async function reactionHandler(effect) {
     if (effect.name != 'Reaction') return;
     let actor = effect.parent;
     if (!actor) return;
+    if (!helpers.getFeature(actor, 'Accelerated Reflexes')) return;
     let acceleratedReflexes = 1 + (actor.system.scale['savant']['bonus-reactions'] ?? 0);
     let currentReactionCount = actor.getFlag('5e-content', 'bonusReactionsUsed') ?? 1;
     if (currentReactionCount < acceleratedReflexes) {

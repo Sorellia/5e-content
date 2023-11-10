@@ -1,5 +1,5 @@
 import { helpers } from "../../../../helpers.js";
-import { selectLanguage } from "../quickStudy.js";
+import { actorEditorHelpers } from "../../../../utility/actorEditorHelpers.js";
 
 async function intHandler(actor, changes) {
     if (!helpers.getFeature(actor, 'Linguistics')) return;
@@ -11,7 +11,7 @@ async function intHandler(actor, changes) {
     let languagesToGrant = intMod-grantedLanguages;
     
     for (let i = 0; i < languagesToGrant; i++) {
-        await selectLanguage(actor, false);
+        await actorEditorHelpers.selectLanguage(actor);
     }
     actor.setFlag('5e-content', 'savant.linguistics.languagesGranted', intMod);
 }

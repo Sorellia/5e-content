@@ -50,16 +50,14 @@ async function onUse({actor, token, workflow}) {
             },
             'effectmacro': {
                 'onDelete': {
-                    'script': "let tokens = sorelliaAutomations.helpers.findNearby(token.document, 1000).filter(i => i.actor.getFlag('5e-content', 'profoundInsight'))\nconsole.log(tokens);\nfor (let token of tokens) {\ntoken = token.document;\ntoken.actor.unsetFlag('5e-content', 'profoundInsight');}"
+                    'script': "let tokens = sorelliaAutomations.helpers.findNearby(token.document, 1000).filter(i => i.actor.getFlag('5e-content', 'profoundInsight'))\nfor (let token of tokens) {\ntoken = token.document;\ntoken.actor.unsetFlag('5e-content', 'profoundInsight');}"
                 }
             }
         }
     };
     let allies = helpers.findNearby(token, 1000, 'ally');
-    console.log(allies);
     for (let ally of allies) {
         ally = ally.document;
-        console.log(ally);
         ally.actor.setFlag('5e-content', 'profoundInsight', true);
     }
 

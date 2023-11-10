@@ -8,9 +8,10 @@ import { remoteAimCrosshair, remoteDialog, remoteDocumentDialog, remoteDocuments
 import { rest, preRest } from './utility/restListener.js';
 import { savantItemCreationHandler, savantItemUpdateHandler } from './macros/classFeatures/savant/savantItemHandler.js';
 import { scholarlyPursuitCreationManager } from './macros/classFeatures/savant/scholarlyPursuits/scholarlyPursuits.js';
-import { levelUpHandler } from './classLevelupHandler.js';
+import { levelUpHandler } from './classLevelUpHandler.js';
 import { skillToolRoll } from './utility/skillToolListener.js';
 import { talentTreeLevelupHandler } from './macros/variantRules/talentTrees.js';
+import { talentItemAddition } from './macros/variantRules/talents/talentCreationHandler.js';
 export let socket;
 
 Hooks.once('init', async function() {
@@ -34,15 +35,15 @@ Hooks.once('ready', async function () {
 	Hooks.on('midi-qol.damageApplied', macros.sacrificialOffering.onDamage);
 	Hooks.on('midi-qol.preAttackRoll', macros.riteOfBlindness.reactionDefense);
 	// Savant Hooks
-	Hooks.on('midi-qol.preAttackRoll', macros.savant.adroitAnalysis.intSubstitute);
+	Hooks.on('midi-qol.preItemRoll', macros.savant.adroitAnalysis.intSubstitute);
 	Hooks.on('midi-qol.damageApplied', macros.savant.adroitAnalysis.onDamage);
 	Hooks.on('midi-qol.preAttackRoll', macros.savant.adroitAnalysis.markAttackDisadvantage);
 	Hooks.on('midi-qol.preCheckSaves', macros.savant.adroitAnalysis.preSave);
 	Hooks.on('midi-qol.preCheckSaves', macros.savant.flashOfBrilliance.preSave);
 	Hooks.on('midi-qol.preDamageRoll', macros.savant.adroitAnalysis.preDamage);
-	Hooks.on('midi-qol.preDamageRoll', macros.savant.adroitAnalysis.selfDamageBuffs);
+	//Hooks.on('midi-qol.preDamageRoll', macros.savant.adroitAnalysis.selfDamageBuffs);
 	Hooks.on('createItem', savantItemCreationHandler);
-	Hooks.on('createItem', scholarlyPursuitCreationManager)
+	Hooks.on('createItem', scholarlyPursuitCreationManager);
 	Hooks.on('updateItem', savantItemUpdateHandler);
 	Hooks.on('updateActor', macros.savant.acceleratedReflexes.intHandler);
 	Hooks.on('updateActor', macros.savant.predictiveDefense.intHandler);
@@ -61,6 +62,7 @@ Hooks.once('ready', async function () {
 	Hooks.on('closePromptRestDialog', preRest);
 	Hooks.on('updateItem', levelUpHandler);
 	Hooks.on('dnd5e.advancementManagerComplete', talentTreeLevelupHandler);
+	Hooks.on('createItem', talentItemAddition);
 });
 
 globalThis['sorelliaAutomations'] = {

@@ -224,7 +224,7 @@ export let helpers = {
         }
         await warpgate.mutate(token, updates, {}, options);
     },
-    'getTargetFromSingleSet': async function _getTargetFromSingleSet(set) {
+    'getElementFromSingleSet': async function _getElementFromSingleSet(set) {
         let target;
         let iterator = set.entries();
 
@@ -757,7 +757,6 @@ export let helpers = {
                 `;
             }
             content += `</form>`;
-            console.log(content);
             let height = (documents.length * 53 + 83);
             if (documents.length > 14 ) height = 850;
             dialog = new Dialog(

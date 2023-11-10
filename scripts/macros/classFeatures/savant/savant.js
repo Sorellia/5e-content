@@ -13,32 +13,22 @@ let adroitAnalysis = {
         let token = workflow.token.document;
         let validActionTypes = ['mwak', 'rwak', 'msak', 'rsak'];
         if (token.disposition != -1 || target.size != 1 || !validActionTypes.includes(workflow.item.system.actionType)) return;
-        target = await helpers.getTargetFromSingleSet(target);
+        target = await helpers.getElementFromSingleSet(target);
         target = target.document;
         if (!savantHelpers.isMarkSource(token, target)) return;
         if (!savantHelpers.isMark(token)) return;
         workflow.disadvantage = true;
     },
-    'intSubstitute': async function _intSubstitute(workflow, marksmanship = false) {
+    'intSubstitute': async function _intSubstitute(workflow) {
         let target = workflow.targets;
         let actor = workflow.actor;
         let adroitAnalysis = helpers.getFeature(actor, 'Adroit Analysis');
         let item = workflow.item;
         let itemActionType = item.system.actionType;
         let validActionTypes = ['mwak', 'rwak'];
-        if (!adroitAnalysis || target.size != 1 || !validActionTypes.includes(itemActionType)) return;
-        target = await helpers.getTargetFromSingleSet(target);
-        target = target.document;
-        let finesse = item.system.properties.fin ?? false;
-        if (!savantHelpers.isMark(target)) return;
-        if (!finesse) if (actor.system.abilities.int.mod > actor.system.abilities.str.mod) workflow.item.system.ability = 'int';
-        if (finesse) {
-            let bestAttack;
-            if (actor.system.abilities.dex.mod > actor.system.abilities.str.mod) bestAttack = actor.system.abilities.dex.mod;
-            else bestAttack = actor.system.abilities.str.mod;
-            if (actor.system.abilities.int.mod > bestAttack) workflow.item.system.ability = 'int';
-        }
-        if (marksmanship) {
+        if (target.size != 1 || !validActionTypes.includes(itemActionType)) return;
+        let marksmanship = helpers.getFeature(actor, 'Marksmanship'), validWeaponTypes = ['martialR', 'simpleR'];
+        if (marksmanship && validWeaponTypes.includes(item.system.weaponType)) {
             let savantDie = actor.getFlag('5e-content', 'savant.intellectDie.formula'), damageParts = item.system.damage.parts[0], savantDamage;
             if (item.name.includes('Blowgun')) {
                 savantDamage = [`${savantDie} + @mod`, damageParts[1]];
@@ -54,13 +44,20 @@ let adroitAnalysis = {
                 }
             }
         }
+        if (!adroitAnalysis) return;
+        target = await helpers.getElementFromSingleSet(target);
+        target = target.document;
+        let finesse = item.system?.properties?.fin ?? false;
+        if (!savantHelpers.isMark(target)) return;
+        if (!finesse) if (actor.system.abilities.int.mod > actor.system.abilities.str.mod) workflow.item = workflow.item.clone({'system.ability': 'int'}, {'keepId': true});
+        else if (actor.system.abilities.int.mod > actor.system.abilities.str.mod && actor.system.abilities.int.mod > actor.system.abilities.dex.mod) workflow.item = workflow.item.clone({'system.ability': 'int'}, {'keepId': true});
     },
     'preDamage': async function _preDamage(workflow) {
         let deafened = helpers.findEffect(workflow.actor, 'Deafened');
         if (deafened) return;
         let target = workflow.hitTargets;
         if (target.size === 0) return;
-        target = await helpers.getTargetFromSingleSet(target);
+        target = await helpers.getElementFromSingleSet(target);
         target = target.document;
         if (savantHelpers.isMark(target)) {
             let actor = workflow.actor;
@@ -167,11 +164,6 @@ let adroitAnalysis = {
             queue.remove(workflow.uuid);
         }
     },
-    'selfDamageBuffs': async function _selfDamageBuffs(workflow) {
-        let marksmanshipWeaponTypes = ['martialR'];
-        if (marksmanshipWeaponTypes.includes(workflow.item.system.weaponType) && helpers.getFeature(workflow.actor, 'Marksmanship')) await adroitAnalysis.intSubstitute(workflow, true);
-        else await adroitAnalysis.intSubstitute(workflow);
-    },
     'onDamage': async function _onDamage(target, {workflow}) {
         let actor = workflow.actor;
         let targets = workflow.hitTargets;
@@ -186,11 +178,8 @@ let adroitAnalysis = {
         let concentration = helpers.findEffect(actor, 'Concentrating');
         if (concentration) {
             let concSource = fromUuidSync(concentration.origin);
-            let target = workflow.targets;
-            if (concSource.name != 'Adroit Analysis' || target.size === 0) return;
-            target = helpers.getTargetFromSingleSet(target);
-            target = target.document;
-            let token = workflow.token.document
+            if (concSource.name != 'Adroit Analysis') return;
+            let token = workflow.token.document;
             if (concSource.parent.uuid != token.actor.uuid) return;
             if (actor.system.abilities.int.mod > actor.system.abilities.con.mod) workflow.item.system.save.ability = 'int';
         } else {
@@ -252,6 +241,14 @@ let adroitAnalysis = {
                     await helpers.createEffect(target.actor, effectData);
                 }
             }
+        }
+        if (helpers.getFeature(actor, 'Adroit Analysis')) {
+            let targets = workflow.targets;
+            if (targets.size === 0) return;
+            targets = await helpers.getElementFromSingleSet(targets);
+            targets = targets.document;
+            if (!savantHelpers.isMark(targets)) return;
+            workflow.item = workflow.item.clone({'system.ability': ''}, {'keepId': true});
         }
     }
 }

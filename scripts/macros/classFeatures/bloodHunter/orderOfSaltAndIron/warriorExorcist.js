@@ -6,7 +6,7 @@ async function onUse({actor, item, token, workflow}) {
     let target = workflow.targets;
     if (target.size > 1) return false;
     else if (target.size === 1) {
-        target = await helpers.getTargetFromSingleSet(target)
+        target = await helpers.getElementFromSingleSet(target)
         target = target.document;
         if (target.disposition === -1) {
             ui.notifications.warn('WARNING | Target is not a willing creature!');
@@ -41,8 +41,6 @@ async function onUse({actor, item, token, workflow}) {
             let duplicateOrigin = false;
             if (targetEffectOrigins.length > 0) {
                 for (let effectOrigin of targetEffectOrigins) {
-                    console.log(effectOrigin[1]);
-                    console.log(effect.origin);
                     if (effectOrigin[1] === effect.origin) {
                         duplicateOrigin = true;
                         continue;

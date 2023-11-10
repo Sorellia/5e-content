@@ -34,7 +34,7 @@ async function instructionRest(actor) {
 async function instructionOnUse({actor, workflow}) {
     let target = workflow.targets;
     if (target.size != 1) return false;
-    target = await helpers.getTargetFromSingleSet(target);
+    target = await helpers.getElementFromSingleSet(target);
     target = target.document;
     let instructionChoices = [['A Skill', 'skill'], ['A Tool', 'tool'], ['A Weapon', 'weapon'], ['A Language', 'language']];
     let choice = await helpers.dialog('Instruction', instructionChoices, 'Which of the following would you like to give to your target?', 'column');
