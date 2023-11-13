@@ -11,7 +11,7 @@ import { scholarlyPursuitCreationManager } from './macros/classFeatures/savant/s
 import { levelUpHandler } from './classLevelUpHandler.js';
 import { skillToolRoll } from './utility/skillToolListener.js';
 import { talentTreeLevelupHandler } from './macros/variantRules/talentTrees.js';
-import { talentItemAddition } from './macros/variantRules/talents/talentCreationHandler.js';
+import { talentItemAddition } from './macros/variantRules/talentCreationHandler.js';
 export let socket;
 
 Hooks.once('init', async function() {
@@ -41,7 +41,6 @@ Hooks.once('ready', async function () {
 	Hooks.on('midi-qol.preCheckSaves', macros.savant.adroitAnalysis.preSave);
 	Hooks.on('midi-qol.preCheckSaves', macros.savant.flashOfBrilliance.preSave);
 	Hooks.on('midi-qol.preDamageRoll', macros.savant.adroitAnalysis.preDamage);
-	//Hooks.on('midi-qol.preDamageRoll', macros.savant.adroitAnalysis.selfDamageBuffs);
 	Hooks.on('createItem', savantItemCreationHandler);
 	Hooks.on('createItem', scholarlyPursuitCreationManager);
 	Hooks.on('updateItem', savantItemUpdateHandler);

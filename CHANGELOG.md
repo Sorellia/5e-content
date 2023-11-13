@@ -1,3 +1,12 @@
+# 0.6.66 Release:
+Another small update; some other ability refactors and the inclusion of some initial automation for certain talents.
+
+## New Content:
+* Automation for the tactician talent, to let you swap the initiative scores of two allies.
+
+## Bug Fixes:
+* Bug fixes for the savant adroit analysis automation, to make it now work for ranged weapons with marksmanship properly.
+
 # 0.6.65 Release:
 Very small update; several refactors to previous features to make them more universally applicable, and the first additions of talent creation support.
 

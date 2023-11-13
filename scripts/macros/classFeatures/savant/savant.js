@@ -20,37 +20,42 @@ let adroitAnalysis = {
         workflow.disadvantage = true;
     },
     'intSubstitute': async function _intSubstitute(workflow) {
+        if (!helpers.getFeature(workflow.actor, 'Adroit Analysis')) return;
         let target = workflow.targets;
         let actor = workflow.actor;
-        let adroitAnalysis = helpers.getFeature(actor, 'Adroit Analysis');
         let item = workflow.item;
         let itemActionType = item.system.actionType;
         let validActionTypes = ['mwak', 'rwak'];
         if (target.size != 1 || !validActionTypes.includes(itemActionType)) return;
-        let marksmanship = helpers.getFeature(actor, 'Marksmanship'), validWeaponTypes = ['martialR', 'simpleR'];
-        if (marksmanship && validWeaponTypes.includes(item.system.weaponType)) {
-            let savantDie = actor.getFlag('5e-content', 'savant.intellectDie.formula'), damageParts = item.system.damage.parts[0], savantDamage;
-            if (item.name.includes('Blowgun')) {
-                savantDamage = [`${savantDie} + @mod`, damageParts[1]];
-                workflow.item.system.damage.parts[0] = savantDamage;
-            } else {
-                let regex = /(\d*)(D\d*)((?:[+*-](?:\d+|\([A-Z]*\)))*)(?:\+(D\d*))?/gi;
-                let itemDamage = damageParts[0].match(regex);
-                itemDamage = await new Roll(itemDamage[0]);
-                let savantFaces = actor.getFlag('5e-content', 'savant.intellectDie.faces');
-                if (savantFaces > itemDamage.dice[0].faces) {
-                    savantDamage = [`${savantDie} + @mod`, damageParts[1]];
-                    workflow.item.system.damage.parts[0] = savantDamage;
-                }
-            }
-        }
-        if (!adroitAnalysis) return;
+        let validWeaponTypes = ['martialR', 'simpleR', 'simpleF', 'martialF'], finesse = item.system?.properties?.fin ?? false;
         target = await helpers.getElementFromSingleSet(target);
         target = target.document;
-        let finesse = item.system?.properties?.fin ?? false;
-        if (!savantHelpers.isMark(target)) return;
-        if (!finesse) if (actor.system.abilities.int.mod > actor.system.abilities.str.mod) workflow.item = workflow.item.clone({'system.ability': 'int'}, {'keepId': true});
-        else if (actor.system.abilities.int.mod > actor.system.abilities.str.mod && actor.system.abilities.int.mod > actor.system.abilities.dex.mod) workflow.item = workflow.item.clone({'system.ability': 'int'}, {'keepId': true});
+        if (helpers.getFeature(actor, 'Marksmanship') && validWeaponTypes.includes(item.system.weaponType)) {
+            let sDie = actor.getFlag('5e-content', 'savant.intellectDie'), damageParts = item.system.damage.parts, savantDamage;
+            if (item.name.includes('Blowgun')) {
+                savantDamage = [`1${sDie.formula} + @mod`, damageParts[0][1]];
+            } else {
+                let regex = /(\d*)(D\d*)((?:[+*-](?:\d+|\([A-Z]*\)))*)(?:\+(D\d*))?/gi;
+                let itemDamage = damageParts[0][0].match(regex), itemDamageRoll = await new Roll(itemDamage[0]);
+                if (sDie.faces >= itemDamageRoll.dice[0].faces) {
+                    let firearms = ['simpleF', 'martialF'];
+                    if (firearms.includes(item.system.weaponType)) savantDamage = [`${itemDamageRoll.dice[0].number}${sDie.formula}`, damageParts[0][1]];
+                    else savantDamage = [`${itemDamageRoll.dice[0].number}${sDie.formula} + @mod`, damageParts[0][1]];
+                }
+            }
+            if (savantHelpers.isMark(target)) {
+                if (!finesse) if (actor.system.abilities.int.mod > actor.system.abilities.dex.mod) workflow.item = workflow.item.clone({'system.ability': 'int', 'system.damage.parts': damageParts}, {'keepId': true});
+                else if (actor.system.abilities.int.mod > actor.system.abilities.str.mod && actor.system.abilities.int.mod > actor.system.abilities.dex.mod) workflow.item = workflow.item.clone({'system.ability': 'int', 'system.damage.parts': damageParts}, {'keepId': true});
+            } else {
+                workflow.item = workflow.item.clone({'system.damage.parts': damageParts}, {'keepId': true});
+            }
+        } else {
+            if (!savantHelpers.isMark(target)) return;
+            if (!finesse) {
+                if (actor.system.abilities.int.mod > actor.system.abilities.str.mod) workflow.item = workflow.item.clone({'system.ability': 'int'}, {'keepId': true});
+            }
+            else if (actor.system.abilities.int.mod > actor.system.abilities.str.mod && actor.system.abilities.int.mod > actor.system.abilities.dex.mod) workflow.item = workflow.item.clone({'system.ability': 'int'}, {'keepId': true});
+        }
     },
     'preDamage': async function _preDamage(workflow) {
         let deafened = helpers.findEffect(workflow.actor, 'Deafened');
@@ -60,8 +65,7 @@ let adroitAnalysis = {
         target = await helpers.getElementFromSingleSet(target);
         target = target.document;
         if (savantHelpers.isMark(target)) {
-            let actor = workflow.actor;
-            let token = workflow.token.document;
+            let actor = workflow.actor, token = workflow.token.document;
             if (token.disposition === -1) return;
             let savantDie, wondrousIntellect = helpers.getFeature(actor, 'Wondrous Intellect');
     
@@ -170,7 +174,7 @@ let adroitAnalysis = {
         if (!helpers.getFeature(actor, 'Adroit Analysis')) return;
         if (targets.size != 1) return;
         target = target.document;
-        if (!savantHelpers.isMark(target) || !savantHelpers.isMarkSource(target, workflow.token)) return;
+        if (!savantHelpers.isMark(target) || !savantHelpers.isMarkSource(target, workflow.token.document)) return;
         await promptAdroitInformation(target.actor);
     },
     'preSave': async function _preSave(workflow) {

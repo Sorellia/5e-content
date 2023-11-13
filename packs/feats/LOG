@@ -1,5 +1,5 @@
-2023/11/08-02:20:05.308 3ddc Recovering log #131
-2023/11/08-02:20:05.308 3ddc Level-0 table #133: started
-2023/11/08-02:20:05.335 3ddc Level-0 table #133: 5248 bytes OK
-2023/11/08-02:20:05.393 3ddc Delete type=0 #131
-2023/11/08-02:20:05.393 3ddc Delete type=3 #130
+2023/11/13-17:36:38.064 22ec Recovering log #141
+2023/11/13-17:36:38.064 22ec Level-0 table #143: started
+2023/11/13-17:36:38.097 22ec Level-0 table #143: 9938 bytes OK
+2023/11/13-17:36:38.138 22ec Delete type=0 #141
+2023/11/13-17:36:38.140 22ec Delete type=3 #140

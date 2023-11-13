@@ -1,5 +1,6 @@
 import { constants } from "../../constants.js";
 import { helpers } from "../../helpers.js";
+import { tactician } from "./talents/tactician.js";
 
 export async function talentTreeLevelupHandler(advancement) {
     let advancementSteps = advancement.steps;
@@ -239,4 +240,8 @@ async function handleWeaponSpecs(actor, majorSpecs = 0, intermediateSpecs = 0, m
             await actor.createEmbeddedDocuments('Item', [itemData]);
         }
     }
+}
+
+export let talents = {
+    'tactician': tactician
 }

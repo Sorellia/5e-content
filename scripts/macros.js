@@ -17,6 +17,8 @@ import { harnessDivinePower } from './macros/classFeatures/cleric/harnessDivineP
 import { turnUndead } from './macros/classFeatures/cleric/turnUndead.js';
 // Baldurs Gate 3
 import { bg3 } from './macros/variantRules/bg3/bg3.js';
+// Talents
+import { talents } from './macros/variantRules/talentTrees.js';
 
 
 export let macros = {
@@ -38,5 +40,7 @@ export let macros = {
     'harnessDivinePower': harnessDivinePower,
     'turnUndead': turnUndead,
     // BG3
-    'bg3': bg3
+    'bg3': bg3,
+    // Talents
+    'talents': talents
 }
