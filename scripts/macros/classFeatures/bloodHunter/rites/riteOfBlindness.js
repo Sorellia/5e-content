@@ -1,6 +1,7 @@
 import { helpers } from "../../../../helpers.js";
 import { queue } from "../../../../utility/queue.js";
 import { constants } from "../../../../constants.js";
+import { bloodHunter } from "../bloodHunter.js";
 
 async function reactionDefense(workflow) {
     let targetToken = workflow.hitTargets;
@@ -15,8 +16,7 @@ async function reactionDefense(workflow) {
     if (!queueSetup) return;
     let rite = await helpers.getFeature(targetToken.actor, 'Rite of Blindness');
     let tokens = helpers.findNearby(attackingToken, 30, 'enemy').filter(i => helpers.getFeature(i.actor, 'Rite of Blindness') && !helpers.findEffect(i.actor, 'Reaction'));
-    let itemUse = false;
-    let sourceActor;
+    let itemUse = false, sourceActor, proceed = true;
     if (!rite) {
         if (tokens.length === 0) {
             queue.remove(workflow.uuid);
@@ -33,9 +33,10 @@ async function reactionDefense(workflow) {
             let selection = await helpers.remoteDialog('Rite of Blindness', constants.yesNo, firstOwner.id, message, 'row');
             if (!selection) continue;
             await token.actor.setFlag('5e-content', 'blindness.target', workflow.tokenUuid);
-            await helpers.addCondition(token.actor, 'Reaction', false);
-            itemUse = await originItem.use();
-            //itemUse = await MidiQOL.socket().executeAsUser("completeItemUse", MidiQOL.playerForActor(token.actor).id, {itemData: originItem, actorUuid: token.actor.uuid, options: {showFullCard: true, createWorkflow: true}});
+            await bloodHunter.determineVitalSacrifice({item: originItem, token: token, actor: token.actor, args: {targets: []}});
+            proceed = token.actor.getFlag('5e-content', 'vitalSacrifice.proceed');
+            if (!proceed && originItem.system.uses.value) proceed = true; 
+            itemUse = await MidiQOL.socket().executeAsUser("completeItemUse", firstOwner.id, {itemData: originItem, actorUuid: token.actor.uuid, options: {showFullCard: true, createWorkflow: true}});
             if (itemUse) {
                 sourceActor = token.actor;
                 break;
@@ -51,15 +52,21 @@ async function reactionDefense(workflow) {
         let selection = await helpers.remoteDialog('Rite of Blindness', constants.yesNo, firstOwner.id, message, 'row');
         if (selection) {
             await targetToken.actor.setFlag('5e-content', 'blindness.target', workflow.tokenUuid);
-            await helpers.addCondition(targetToken.actor, 'Reaction', false);
-            itemUse = await rite.use();
+            await bloodHunter.determineVitalSacrifice({item: originItem, token: targetToken, actor: targetToken.actor, args: {targets: []}});
+            proceed = targetToken.actor.getFlag('5e-content', 'vitalSacrifice.proceed');
+            if (!proceed && rite.system.uses.value) proceed = true; 
+            itemUse = await MidiQOL.socket().executeAsUser("completeItemUse", firstOwner.id, {itemData: rite, actorUuid: targetToken.actor.uuid, options: {showFullCard: true, createWorkflow: true}});
         }
     }
+
     await helpers.clearThirdPartyReactionMessage();
-    if (itemUse) {
+    if (itemUse && proceed) {
         if (!sourceActor) sourceActor = targetToken.actor;
+        await helpers.addCondition(sourceActor, 'Reaction', false);
         await debuffAttack(sourceActor, workflow);
     }
+
+    sourceActor.unsetFlag('5e-content', 'vitalSacrifice.proceed');
     queue.remove(workflow.uuid);
 }
 
@@ -74,7 +81,7 @@ async function debuffAttack(sourceActor, workflow) {
     if (helpers.getFeature(sourceActor, 'Sanguine Mastery')) debuff = '2' + debuff + 'kh1';
 
     let effectData = {
-        'duration': {'seconds': 6},
+        'duration': {'seconds': 12},
         'icon': originItem.img,
         'label': riteName,
         'origin': originItem.uuid,
@@ -96,7 +103,7 @@ async function debuffAttack(sourceActor, workflow) {
         effectData.flags.dae.specialDuration.splice(0,1);
         effectData.flags = {
             'dae': {
-                'specialDuration': ['turnEndSource']
+                'specialDuration': ['turnStartSource']
             }
         };
     }

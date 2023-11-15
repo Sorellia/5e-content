@@ -1,3 +1,6 @@
+# 0.6.67 Release:
+Updated automation for blood hunter and savant to fix some bugs.
+
 # 0.6.66 Release:
 Another small update; some other ability refactors and the inclusion of some initial automation for certain talents.
 

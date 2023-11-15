@@ -36,7 +36,7 @@ export let bloodHunter = {
         }
     },
     // Function to perform the actual vital sacrifice
-    'performVitalSacrifice': async function _performVitalSacrifice(itemCardId, riteDie, token, updateHP = true) {
+    'performVitalSacrifice': async function _performVitalSacrifice(riteDie, token, updateHP = true) {
         let actor = token.actor;
         // Query the above function to determine what the vital sacrifice roll will be, and then subtract the con mod for the purposes of the active effect
         let damageRoll = await bloodHunter.rollRiteDie(actor, riteDie, 'vital-control');
@@ -108,7 +108,7 @@ export let bloodHunter = {
         }
         if (updateHP) {
             // Roll the workflow damage via midi to 'present it', and update the actor to actually apply the damage automatically
-            await helpers.applyWorkflowDamage(token, damageRoll, "none", [], "Vital Sacrifice", itemCardId);
+            damageRoll.toMessage({flavor: 'Vital Sacrifice - HP Damage', user: helpers.firstOwner(actor), speaker: ChatMessage.implementation.getSpeaker({actor: actor})}, {rollMode: CONST.DICE_ROLL_MODES.PUBLIC});
             let hpUpdate = actor.system.attributes.hp.value - damageRoll.total;
             await actor.update({'system.attributes.hp.value': hpUpdate});
         }
@@ -134,8 +134,8 @@ export let bloodHunter = {
         let riteLabel = workflow.item.name;
         let actor = workflow.actor;
         let saveDC = helpers.getItemDC(workflow.item);
-        if(helpers.getFeature(actor, 'Sanguine Mastery')) riteDie = '2' + riteDie + 'kh1';
-        if(invoked) riteLabel = riteLabel + ' (Invoked)';
+        if (helpers.getFeature(actor, 'Sanguine Mastery')) riteDie = '2' + riteDie + 'kh1';
+        if (invoked) riteLabel = riteLabel + ' (Invoked)';
 
         // Setup 'generic' effect data; all effects modify this to achieve their results
         let effectData = {
@@ -754,7 +754,7 @@ export let bloodHunter = {
         return effectData; // Return the effect data; by now it's been modified with the final data of the rite in question.
     },
     // Prompt the actor for a vital sacrifice; takes on the actor to be inspected, its token, the item calling the prompt and if it must be accepted to use the item.
-    'vitalSacrificePrompt': async function _vitalSacrificePrompt(workflow, actor, token, item, neededForItemUse = false, sizeConstraint = false, updateUses = true, bloodLessCreature = false) {
+    'vitalSacrificePrompt': async function _vitalSacrificePrompt(actor, token, item, neededForItemUse = false, sizeConstraint = false, updateUses = true, bloodLessCreature = false) {
         // If the actor's HP is too low for a vital sacrifice, tell them.
         let riteDice = actor.system.scale[`blood-hunter`][`blood-rite-die`];
         if (actor.system.attributes.hp.value <= riteDice.faces) {
@@ -777,14 +777,15 @@ export let bloodHunter = {
 
         if (result && neededForItemUse) { // If the player chose YES and the item MUST have a vital sacrifice to operate.
             actor.setFlag('5e-content', 'vitalSacrifice.proceed', true);
-            if (updateUses) await helpers.updateItemUses(token.document, item, 1);
-            await bloodHunter.performVitalSacrifice('', riteDice.die, token);
+            if (updateUses) await item.update({'system.uses.value': 1});
+            await warpgate.wait(100);
+            await bloodHunter.performVitalSacrifice(riteDice.die, token);
             return true;
             // Set the flag appropriate to vital sacrifice, so that the later workflow can detect that it must be used. Update the item's uses to allow it to be used, and then return true to allow the workflow to continue.
         } else if (result && !neededForItemUse) { // If the player chose YES but the item does NOT require a vital sacrifice to operate.
             actor.setFlag('5e-content', 'vitalSacrifice.proceed', true);
             let vitalC = await bloodHunter.vitalControlPrompt(actor, token);
-            if (!vitalC) await bloodHunter.performVitalSacrifice('', riteDice.die, token);
+            if (!vitalC) await bloodHunter.performVitalSacrifice(riteDice.die, token);
             return true;
             // Set the flag appropriate to vital sacrifice, and test for vital control before returning true, to allow the workflow to continue.
         } else if (!result && !neededForItemUse) { // If the player chose NO but the item does NOT require a vital sacrifice to operate.
@@ -805,7 +806,7 @@ export let bloodHunter = {
         const result = await helpers.remoteDialog('Vital Control', constants.yesNo, firstOwner.id,'Would you like to invoke this vital sacrifice without paying the cost, using vital control? You can only do this <b>once</b> per long rest.', 'row');
         if (result) {
             // If the actor chose to use vital control, set the appropirate flag and deduct a use from vital control to deplete it to 0 charges.
-            await helpers.updateItemUses(token.document, vitalControl, -1);
+            await vitalControl.update({'system.uses.value': vitalControl.system.uses.value - 1});
             actor.setFlag('5e-content', 'vitalControl.proceed', true);
             return true;
         } else return false;
@@ -815,38 +816,34 @@ export let bloodHunter = {
         let item = args.item;
         let actor = args.actor;
         let token = args.token;
-        let workflow = args.workflow;
-        let target = args.args[0].targets[0];
-        let itemUses = item.system.uses.value;
-        let targetSize = helpers.getSize(target.actor);
-        let conc = helpers.findEffect(target.actor, 'Concentrating');
-        let curseSpec = helpers.getFeature(actor, 'Curse Specialist');
-        let targetRace = helpers.raceOrType(target.actor);
+        let target = args.args[0]?.targets[0] ?? false;
+        if (!target) target = fromUuidSync(actor.getFlag('5e-content', 'blindness.target'));
+        if (!target) return;
         let invalidRaces = ['undead', 'construct', 'ooze', 'elemental'];
         // Coverage for the specific interaction of several rites needing specific conditions to be met.
-        if (!curseSpec && invalidRaces.includes(targetRace)) {
+        if (!helpers.getFeature(actor, 'Curse Specialist') && invalidRaces.includes(helpers.raceOrType(target.actor))) {
             let vitalSacrifice;
-            if (itemUses === 0) { 
-                vitalSacrifice = await bloodHunter.vitalSacrificePrompt(workflow, actor, token, item, true, false, true, true);
+            if (!item.system.uses.value) { 
+                vitalSacrifice = await bloodHunter.vitalSacrificePrompt(actor, token, item, true, false, true, true);
                 if (!vitalSacrifice) return;
-            } else vitalSacrifice = await bloodHunter.vitalSacrificePrompt(workflow, actor, token, item, true, false, false, true);
+            } else vitalSacrifice = await bloodHunter.vitalSacrificePrompt(actor, token, item, true, false, false, true);
             if (!vitalSacrifice) return false;
         } else {
             if (item.name === 'Rite of the Puppet' && target.actor.attributes.hp.value !== 0) {
                 ui.notifications.warn("Target has HP remaining and is not a valid target!");
                 return false;
-            } else if (item.name === 'Rite of Binding' && targetSize > 3) {
-                let vitalSacrifice = await bloodHunter.vitalSacrificePrompt(workflow, actor, token, item, true, true);
+            } else if (item.name === 'Rite of Binding' && helpers.getSize(target.actor) > 3) {
+                let vitalSacrifice = await bloodHunter.vitalSacrificePrompt(actor, token, item, true, true);
                 if (!vitalSacrifice) return false;
-            } else if (item.name === 'Rite of Confusion' && !conc) {
+            } else if (item.name === 'Rite of Confusion' && !helpers.findEffect(target.actor, 'Concentrating')) {
                 ui.notifications.warn("Target must be Concentrating to be a valid target!");
                 return false;
-            } else if (itemUses === 0) {
+            } else if (!item.system.uses.value) {
     // If the item has no uses and it isn't the rite of exsanguination (which cannot be invoked at 0 uses), tell the player that they MUST use a vital sacrifice to use the rite.
                 if (item.name === 'Rite of Exsanguination') return;
-                let vitalSacrifice = await bloodHunter.vitalSacrificePrompt(workflow, actor, token, item, true);
+                let vitalSacrifice = await bloodHunter.vitalSacrificePrompt(actor, token, item, true);
                 if (!vitalSacrifice) return;
-            } else await bloodHunter.vitalSacrificePrompt(workflow, actor, token, item);
+            } else await bloodHunter.vitalSacrificePrompt(actor, token, item);
         }
     },
     // Should take place before active effects on all rites; parses whether or not a vital sacrifice is required, or if a vital control is available.
@@ -870,20 +867,22 @@ export let bloodHunter = {
         // If vital control was used, unset vital sacrifice and remove both flags.
         if (vitalControl) {
             vitalSacrifice = "undefined";
-            actor.unsetFlag('5e-content', 'vitalSacrifice.proceed');
             actor.unsetFlag('5e-content', 'vitalControl');
             if (applyRites) {
                 let reactionTarget = actor.getFlag('5e-content', 'blindness.target') ?? false;
-                if (!reactionTarget) await bloodHunter.applyRiteEffects(workflow, target, riteDice.die, true);
-                else await bloodHunter.applyRiteEffects(workflow, fromUuidSync(reactionTarget), riteDice.die, true);
+                if (!reactionTarget) {
+                    actor.unsetFlag('5e-content', 'vitalSacrifice.proceed');
+                    await bloodHunter.applyRiteEffects(workflow, target, riteDice.die, true);
+                } else await bloodHunter.applyRiteEffects(workflow, fromUuidSync(reactionTarget), riteDice.die, true);
             }
         // Else, if vital sacrifice was called for, call the function to roll a vital sacrifice, and unset the vital sacrifice flag.
         } else if (vitalSacrifice) {
-            actor.unsetFlag('5e-content', 'vitalSacrifice.proceed');
             if (applyRites) {
                 let reactionTarget = actor.getFlag('5e-content', 'blindness.target') ?? false;
-                if (!reactionTarget) await bloodHunter.applyRiteEffects(workflow, target, riteDice.die, true);
-                else await bloodHunter.applyRiteEffects(workflow, fromUuidSync(reactionTarget), riteDice.die, true);
+                if (!reactionTarget) {
+                    actor.unsetFlag('5e-content', 'vitalSacrifice.proceed');
+                    await bloodHunter.applyRiteEffects(workflow, target, riteDice.die, true);
+                } else await bloodHunter.applyRiteEffects(workflow, fromUuidSync(reactionTarget), riteDice.die, true);
             }
         } else {
             if (applyRites) {

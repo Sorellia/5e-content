@@ -6,7 +6,7 @@ export let bloodHunterHelpers = {
         actor.unsetFlag('5e-content', 'curseSpecialist');
         if (previousRite) {
             previousRite = actor.items.get(previousRite).toObject();
-            await helpers.updateItemUses(token, previousRite, -1, true);
+            await previousRite.update({'system.uses.value': previousRite.system.uses.value - 1, 'system.uses.max': previousRite.system.uses.max - 1});
         }
         let foundRites = [];
         actor.items.forEach(item => {
@@ -23,7 +23,7 @@ export let bloodHunterHelpers = {
 
         let riteData = actor.items.get(selection).toObject();
 
-        await helpers.updateItemUses(token, riteData, 1, true);
+        await riteData.update({'system.uses.value': riteData.system.uses.value + 1, 'system.uses.max': riteData.system.uses.max + 1});
         actor.setFlag('5e-content', 'curseSpecialist', selection);
     }
 }

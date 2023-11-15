@@ -43,6 +43,7 @@ let adroitAnalysis = {
                     else savantDamage = [`${itemDamageRoll.dice[0].number}${sDie.formula} + @mod`, damageParts[0][1]];
                 }
             }
+            damageParts.splice(0, 1, savantDamage);
             if (savantHelpers.isMark(target)) {
                 if (!finesse) if (actor.system.abilities.int.mod > actor.system.abilities.dex.mod) workflow.item = workflow.item.clone({'system.ability': 'int', 'system.damage.parts': damageParts}, {'keepId': true});
                 else if (actor.system.abilities.int.mod > actor.system.abilities.str.mod && actor.system.abilities.int.mod > actor.system.abilities.dex.mod) workflow.item = workflow.item.clone({'system.ability': 'int', 'system.damage.parts': damageParts}, {'keepId': true});

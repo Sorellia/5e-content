@@ -186,44 +186,6 @@ export let helpers = {
 
         await actor.update({[`system.traits.weaponProf.value`]: weaponData});
     },
-    'updateItemUses': async function _updateItemUses(token, item, delta, updateMax = false) {
-        let updates;
-        if (!updateMax) {
-            updates = {
-                'embedded': {
-                    'Item': {
-                        [item.name]: {
-                            'system': {
-                                'uses': {
-                                    'value': item.system.uses.value + delta
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-        } else {
-            updates = {
-                'embedded': {
-                    'Item': {
-                        [item.name]: {
-                            'system': {
-                                'uses': {
-                                    'value': item.system.uses.value + delta,
-                                    'max': parseInt(item.system.uses.max) + delta
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-        }
-        let options = {
-            'permanent': true,
-            'name': item.name
-        }
-        await warpgate.mutate(token, updates, {}, options);
-    },
     'getElementFromSingleSet': async function _getElementFromSingleSet(set) {
         let target;
         let iterator = set.entries();

@@ -17,7 +17,7 @@ export let crimsonOffering = {
                 let vitalSacrifice = await bloodHunter.vitalSacrificePrompt(workflow, actor, token, item, true, false, false);
                 if (!vitalSacrifice) return false;
             } else {
-                await helpers.updateItemUses(token.document, improvedOffering, -1);
+                await improvedOffering.update({'system.uses.value': improvedOffering.system.uses.value - 1});
                 actor.setFlag('5e-content', 'vitalSacrifice.proceed', true);
             }
         } else {
@@ -177,7 +177,8 @@ export let crimsonOffering = {
                 return;
             }
         } else {
-            await helpers.updateItemUses(token.document, crimsonBrand, -1);
+            await crimsonBrand.update({'system.uses.value': crimsonBrand.system.uses.value - 1});
+            
         }
 
         let effectData = {
