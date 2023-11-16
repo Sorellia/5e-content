@@ -107,7 +107,7 @@ let adroitAnalysis = {
                     {
                         'key': 'system.bonuses.All-Damage',
                         'mode': 2,
-                        'value': savantDie,
+                        'value': `+ 1${savantDie}`,
                         'priority': 0
                     }
                 ],

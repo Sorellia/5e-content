@@ -1,3 +1,6 @@
+# 0.6.7 Release:
+More bugfixes for accelerated reflexes, and some new streamlining-focused features.
+
 # 0.6.67 Release:
 Updated automation for blood hunter and savant to fix some bugs.
 

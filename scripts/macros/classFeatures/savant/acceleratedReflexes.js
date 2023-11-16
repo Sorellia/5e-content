@@ -18,7 +18,7 @@ async function reactionHandler(effect) {
     if (currentReactionCount < acceleratedReflexes) {
         currentReactionCount++;
         actor.setFlag('5e-content', 'bonusReactionsUsed', currentReactionCount);
-        helpers.removeCondition(actor, 'Reaction');
+        await helpers.removeEffect(effect);
     } else {
         let effectUpdate = {
             'flags': {

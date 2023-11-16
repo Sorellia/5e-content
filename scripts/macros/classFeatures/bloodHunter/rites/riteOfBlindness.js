@@ -33,10 +33,15 @@ async function reactionDefense(workflow) {
             let selection = await helpers.remoteDialog('Rite of Blindness', constants.yesNo, firstOwner.id, message, 'row');
             if (!selection) continue;
             await token.actor.setFlag('5e-content', 'blindness.target', workflow.tokenUuid);
-            await bloodHunter.determineVitalSacrifice({item: originItem, token: token, actor: token.actor, args: {targets: []}});
+            let [config, options] = constants.syntheticItemWorkflowOptions([attackingToken.uuid]);
+            await warpgate.wait(100);
+            let item = await helpers.remoteRollItem(originItem, config, options, firstOwner.id);
+            console.log(item);
+            //await bloodHunter.determineVitalSacrifice({item: originItem, token: token, actor: token.actor, args: {targets: []}});
             proceed = token.actor.getFlag('5e-content', 'vitalSacrifice.proceed');
             if (!proceed && originItem.system.uses.value) proceed = true; 
-            itemUse = await MidiQOL.socket().executeAsUser("completeItemUse", firstOwner.id, {itemData: originItem, actorUuid: token.actor.uuid, options: {showFullCard: true, createWorkflow: true}});
+            itemUse = true;// await MidiQOL.socket().executeAsUser("completeItemUse", firstOwner.id, {itemData: originItem, actorUuid: token.actor.uuid, options: {showFullCard: true, createWorkflow: true}});
+            token.actor.unsetFlag('5e-content', 'vitalSacrifice.proceed');
             if (itemUse) {
                 sourceActor = token.actor;
                 break;
@@ -55,6 +60,8 @@ async function reactionDefense(workflow) {
             await bloodHunter.determineVitalSacrifice({item: originItem, token: targetToken, actor: targetToken.actor, args: {targets: []}});
             proceed = targetToken.actor.getFlag('5e-content', 'vitalSacrifice.proceed');
             if (!proceed && rite.system.uses.value) proceed = true; 
+
+            targetToken.actor.unsetFlag('5e-content', 'vitalSacrifice.proceed');
             itemUse = await MidiQOL.socket().executeAsUser("completeItemUse", firstOwner.id, {itemData: rite, actorUuid: targetToken.actor.uuid, options: {showFullCard: true, createWorkflow: true}});
         }
     }
@@ -66,7 +73,6 @@ async function reactionDefense(workflow) {
         await debuffAttack(sourceActor, workflow);
     }
 
-    sourceActor.unsetFlag('5e-content', 'vitalSacrifice.proceed');
     queue.remove(workflow.uuid);
 }
 

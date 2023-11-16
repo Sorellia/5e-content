@@ -12,25 +12,40 @@ import { levelUpHandler } from './classLevelUpHandler.js';
 import { skillToolRoll } from './utility/skillToolListener.js';
 import { talentTreeLevelupHandler } from './macros/variantRules/talentTrees.js';
 import { talentItemAddition } from './macros/variantRules/talentCreationHandler.js';
+import { runAsGM, runAsUser } from './runAsGM.js';
+import { registerSettings } from './settings.js';
 export let socket;
 
 Hooks.once('init', async function() {
 	console.log("5e Content | Initialising module!");
 	registerFeatures();
+	registerSettings();
 });
 
 Hooks.once('socketlib.ready', async function() {
 	console.log("5e Content | Registering sockets!");
 	socket = socketlib.registerModule('5e-content');
+	// Remote Combat Handlers
+	socket.register('updateCombatant', runAsGM.updateCombatant);
+	// Remote Dialogs
 	socket.register('remoteDialog', remoteDialog);
 	socket.register('remoteDocumentDialog', remoteDocumentDialog);
 	socket.register('remoteDocumentsDialog', remoteDocumentsDialog);
 	socket.register('remoteAimCrosshair', remoteAimCrosshair);
 	socket.register('remoteMenu', remoteMenu);
+	// Remote Execution Handlers
+	socket.register('createEffect', runAsGM.createEffect);
+	socket.register('updateEffect', runAsGM.updateEffect);
+	socket.register('removeEffect', runAsGM.removeEffect);
+	socket.register('rollItem', runAsUser.rollItem);
 });
 
 Hooks.once('ready', async function () {
 	console.log("5e Content | Registering Automation Hooks");
+	// Assign the last GM
+	if (game.user.isGM) {
+		game.settings.set('5e-content', 'LastGM', game.user.id);
+	}
 	// Blood Hunter Hooks
 	Hooks.on('midi-qol.damageApplied', macros.sacrificialOffering.onDamage);
 	Hooks.on('midi-qol.preAttackRoll', macros.riteOfBlindness.reactionDefense);

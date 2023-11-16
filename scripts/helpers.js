@@ -207,14 +207,14 @@ export let helpers = {
         if (game.user.isGM) {
             await actor.createEmbeddedDocuments('ActiveEffect', [effectData]);
         } else {
-            await MidiQOL.socket().executeAsGM('createEffects', {'actorUuid': actor.uuid, 'effects': [effectData]});
+            await socket.executeAsGM('createEffect', actor.uuid, effectData);
         }
     },
     'removeEffect': async function _removeEffect(effect) {
         if (helpers.firstOwner(effect).id === game.user.id) {
             await effect.delete();
         } else {
-            await MidiQOL.socket().executeAsGM('removeEffects', {'actorUuid': effect.parent.uuid, 'effects': [effect.id]});
+            await socket.executeAsGM('removeEffect', effect.uuid);
         }
     },
     'updateEffect': async function _updateEffect(effect, updates) {
@@ -222,7 +222,7 @@ export let helpers = {
             await effect.update(updates);
         } else {
             updates._id = effect.id;
-            await MidiQOL.socket().executeAsGM('updateEffects', {'actorUuid': effect.parent.uuid, 'updates': [updates]});
+            await socket.executeAsGM('updateEffect', effect.uuid, updates);
         }
     },
     'addCondition': async function _addCondition(actor, name, overlay, origin) {
@@ -977,4 +977,58 @@ export let helpers = {
     'nth': function _nth(number) {
         return number + ['st','nd','rd'][((number+90)%100-10)%10-1]||'th';
     },
+    'levelOrCR': function _levelOrCR(actor) {
+        return actor.type === 'character' ? actor.system.details.level : actor.system.details.cr ?? 0;
+    },
+    'titleCase': function _titleCase(inputString) {
+        return inputString.toLowerCase().replace(/\b\w/g, s => s.toUpperCase());
+    },
+    'checkCover': function _checkCover(token, target, item, displayName) {
+        let cover = MidiQOL.computeCoverBonus(token, target, item);
+        if (!displayName) return cover;
+        switch (cover) {
+            case 0:
+                return 'No Cover';
+            case 2:
+                return 'Half Cover';
+            case 5:
+                return 'Three-Quarters Cover';
+            case 999:
+                return 'Full Cover';
+            default:
+                return 'Unknown Cover';
+        }
+    },
+    'canSense': function _canSense(token, target) {
+        return MidiQOL.canSense(token, target);
+    },
+    'gmDialogMessage': async function _gmDialogMessage() {
+        let lastMessage = game.messages.find(m => m.flags?.['5e-content']?.gmDialogMessage);
+        let message = '<hr>Waiting for GM dialogue selection...';
+        if (lastMessage) await lastMessage.update({'content': message});
+        else {
+            ChatMessage.create({
+                'speaker': {'alias': name},
+                'content': message,
+                'whisper': game.users.filter(u => u.isGM).map(u => u.id),
+                'blind': false,
+                'flags': {
+                    '5e-content': {
+                        'gmDialogMessage': true
+                    }
+                }
+            });
+        }
+    },
+    'clearGMDialogMessage': async function _clearGMDialogMessage() {
+        let lastMessage = game.messages.find(m => m.flags?.['5e-content']?.gmDialogMessage && m.user.id === game.user.id);
+        if (lastMessage) await lastMessage.delete();
+    },
+    'rollItem': async function _rollItem(item, config, options) {
+        return await MidiQOL.completeItemUse(item, config, options);
+    },
+    'remoteRollItem': async function _remoteRollItem(item, config, options, userId) {
+        if (helpers.firstOwner(item.actor).id === userId) return await helpers.rollItem(item, config, options);
+        return await socket.executeAsUser('rollItem', userId, item.uuid, config, options);
+    }
 }

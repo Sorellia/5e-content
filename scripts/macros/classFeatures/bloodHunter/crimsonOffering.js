@@ -14,14 +14,14 @@ export let crimsonOffering = {
         if (improvedOffering && improvedOfferingUses != 0) {
             let result = await helpers.dialog('Improved Crimson Offering', constants.yesNo, 'You may use Crimson Offering <b>once</b> per long rest without making a Vital Sacrifice. Would you like to do that?', 'row')
             if (!result) {
-                let vitalSacrifice = await bloodHunter.vitalSacrificePrompt(workflow, actor, token, item, true, false, false);
+                let vitalSacrifice = await bloodHunter.vitalSacrificePrompt(actor, token, item, true, false, false);
                 if (!vitalSacrifice) return false;
             } else {
                 await improvedOffering.update({'system.uses.value': improvedOffering.system.uses.value - 1});
                 actor.setFlag('5e-content', 'vitalSacrifice.proceed', true);
             }
         } else {
-            let vitalSacrifice = await bloodHunter.vitalSacrificePrompt(workflow, actor, token, item, true, false, false);
+            let vitalSacrifice = await bloodHunter.vitalSacrificePrompt(actor, token, item, true, false, false);
             if (!vitalSacrifice) return false;
         }
     },
